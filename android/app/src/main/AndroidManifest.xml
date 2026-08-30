@@ -1,4 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 仅 Android 9 及以下需要；Android 10+ 使用 MediaStore，不申请广泛存储权限。 -->
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
     <application
         android:label="bill"
         android:name="${applicationName}"
