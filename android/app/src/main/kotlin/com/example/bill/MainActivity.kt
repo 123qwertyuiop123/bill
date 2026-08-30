@@ -1,4 +1,4 @@
-package com.example.bill
+package com.zm.bill
 
 import android.Manifest
 import android.content.ContentUris
@@ -15,7 +15,7 @@ import java.io.File
 import java.io.FileOutputStream
 
 class MainActivity : FlutterActivity() {
-    private val channelName = "com.example.bill/public_storage"
+    private val channelName = "com.zm.bill/public_storage"
     private val permissionRequestCode = 7012
     private var pendingCall: MethodCall? = null
     private var pendingResult: MethodChannel.Result? = null

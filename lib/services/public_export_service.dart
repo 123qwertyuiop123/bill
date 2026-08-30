@@ -9,7 +9,7 @@ class PublicExportException implements Exception {
 
 /// 将应用内部 TXT 自动同步到 Android 公共下载目录。
 class PublicExportService {
-  static const _channel = MethodChannel('com.example.bill/public_storage');
+  static const _channel = MethodChannel('com.zm.bill/public_storage');
 
   /// 自动把内部月度 TXT 同步到“下载/bill/年份”。
   ///
