@@ -1,30 +1,23 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
+import 'package:bill/expense_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:bill/main.dart';
-
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  test('formats amounts for the monthly text file', () {
+    expect(formatAmount(20), '20');
+    expect(formatAmount(9.9), '9.9');
+    expect(formatAmount(12.65), '12.65');
+  });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  test('expense records can be saved as JSON and restored', () {
+    final record = ExpenseRecord(
+      id: '1',
+      reason: '午饭',
+      amount: 9.9,
+      date: DateTime(2026, 8, 29),
+    );
+    final restored = ExpenseRecord.fromJson(record.toJson());
+    expect(restored.reason, '午饭');
+    expect(restored.amount, 9.9);
+    expect(restored.date, DateTime(2026, 8, 29));
   });
 }
