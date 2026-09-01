@@ -1,11 +1,27 @@
-# Bill 收支账本
+# ZM 工具箱
 
-一款简洁的 Flutter 本地收支记录 App。支持收入、支出、分类统计、多 TXT 账本切换，并在 Android 手机上自动生成文件管理器可见的月度 TXT。
+一款简洁、本地优先的 Flutter 多功能工具 App。当前提供 16 个离线工具，并完整保留原有收支账本、分类统计、多 TXT 账本切换和 Android 公共目录自动同步功能。
 
-![界面设计](design/income-expense-ui-no-category-icons.png)
+![工具箱界面设计](design/multitool-ui-overview-square.png)
 
 ## 功能
 
+- 工具箱首页、分类筛选、搜索、收藏和最近使用
+- 基础计算器（不执行输入代码）
+- 长度、重量和温度单位换算
+- 日期间隔和日期推算
+- 使用安全随机数的本地密码生成器
+- 文本字数统计、大小写转换和空行清理
+- 纯本地二维码生成
+- BMI 计算
+- 秒表与倒计时
+- 百分比、折扣和 AA 分摊
+- 年龄和生日倒计时
+- 随机数、骰子、硬币和名单抽取
+- 可持久化的多项目计数器
+- 逐行文本对比
+- 列表排序、去重、打乱和清理
+- 原有收支账本完整保留：
 - 记录收入和支出原因、金额、分类与日期
 - 按天查看、添加、修改和删除记录
 - 按月份统计收入、支出、结余及消费种类
@@ -82,22 +98,40 @@ Android 10 及以上通过 MediaStore 写入公共下载目录，不申请“所
 - Android Application ID：`com.zm.bill`
 - iOS Bundle ID：`com.zm.bill`
 - 当前版本：`1.0.0+1`
-- 数据仅保存在本地，不上传服务器
+- 工具内容仅在本机处理，不上传服务器
+- 工具箱只持久化收藏和最近使用的工具编号
+- 密码生成使用安全随机数，结果不写入文件
+- 二维码只在本地绘制，不申请相机、相册或联网权限
 
-主要目录：
+主要目录（每个工具均为独立模块）：
 
 ```text
 lib/
-├── controllers/    # 账本状态与业务流程
-├── core/           # 主题和通用配置
-├── models/         # 收支、分类和 TXT 文件模型
-├── screens/        # 账本、详情和统计页面
-├── services/       # 内部存储与公共 TXT 同步
-├── utils/          # 日期等工具
-└── widgets/        # 表单、日历和通用组件
+├── app/                    # 工具箱外壳、页面、状态和偏好
+├── core/                   # 统一主题
+├── tools/
+│   ├── expense/            # 完整账本模块（页面、业务、模型、存储、组件）
+│   ├── calculator/         # 计算器
+│   ├── unit_converter/     # 单位换算
+│   ├── date_calculator/    # 日期计算
+│   ├── password_generator/ # 密码生成
+│   ├── text_tools/         # 文本工具
+│   ├── qr_code/            # 二维码
+│   ├── bmi_calculator/     # BMI
+│   ├── stopwatch_timer/    # 秒表与倒计时
+│   ├── percentage_calculator/ # 百分比
+│   ├── bill_split/         # AA 分摊
+│   ├── age_calculator/     # 年龄计算
+│   ├── random_decision/    # 随机决定
+│   ├── tally_counter/      # 计数器
+│   ├── text_diff/          # 文本对比
+│   └── list_processor/     # 列表处理
+└── expense_storage.dart    # 账本旧导入路径的兼容出口
 ```
 
 ## 开发环境
+
+开发或重构前必须先阅读 [开发规范](DEVELOPMENT_GUIDE.md)。该规范定义了工具目录、UI、安全、离线处理、账本兼容、测试和正式构建要求。
 
 安装 Flutter SDK 和 Android Studio，并确认环境正常：
 

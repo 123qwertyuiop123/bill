@@ -1,5 +1,5 @@
-import 'package:bill/models/transaction_type.dart';
-import 'package:bill/widgets/expense_form_sheet.dart';
+import 'package:bill/tools/expense/models/transaction_type.dart';
+import 'package:bill/tools/expense/widgets/expense_form_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

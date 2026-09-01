@@ -41,4 +41,19 @@ ThemeData buildAppTheme() => ThemeData(
     indicatorColor: AppColors.selected,
     elevation: 0,
   ),
+  appBarTheme: const AppBarTheme(
+    backgroundColor: AppColors.canvas,
+    foregroundColor: AppColors.ink,
+    surfaceTintColor: Colors.transparent,
+    elevation: 0,
+    centerTitle: false,
+  ),
+  cardTheme: CardThemeData(
+    color: Colors.white,
+    surfaceTintColor: Colors.transparent,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(14),
+      side: const BorderSide(color: AppColors.line),
+    ),
+  ),
 );

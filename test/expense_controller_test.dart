@@ -1,14 +1,15 @@
-import 'package:bill/controllers/expense_controller.dart';
-import 'package:bill/models/expense_record.dart';
-import 'package:bill/models/ledger_file.dart';
-import 'package:bill/models/transaction_category.dart';
-import 'package:bill/models/transaction_type.dart';
-import 'package:bill/services/expense_storage.dart';
-import 'package:bill/services/public_export_service.dart';
+import 'package:bill/tools/expense/controllers/expense_controller.dart';
+import 'package:bill/tools/expense/models/expense_record.dart';
+import 'package:bill/tools/expense/models/ledger_file.dart';
+import 'package:bill/tools/expense/models/transaction_category.dart';
+import 'package:bill/tools/expense/models/transaction_type.dart';
+import 'package:bill/tools/expense/services/expense_storage.dart';
+import 'package:bill/tools/expense/services/public_export_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _MemoryStorage extends ExpenseStorage {
   final values = <ExpenseRecord>[];
+  final writtenMonths = <DateTime>[];
   String customName = '';
   final files = <LedgerFile>[
     const LedgerFile(id: LedgerFile.defaultId, fileName: '默认.txt'),
@@ -42,7 +43,10 @@ class _MemoryStorage extends ExpenseStorage {
     List<ExpenseRecord> records,
     DateTime month, {
     String fileId = LedgerFile.defaultId,
-  }) => monthFilePath(month, fileId: fileId);
+  }) {
+    writtenMonths.add(DateTime(month.year, month.month));
+    return monthFilePath(month, fileId: fileId);
+  }
 
   @override
   Future<LedgerFile> createMonthFile(
@@ -188,5 +192,28 @@ void main() {
       isTrue,
     );
     expect(controller.selectedFile?.lineFormat, LedgerLineFormat.fullDate);
+  });
+
+  test('only regenerates months affected by a new record', () async {
+    final storage = _MemoryStorage();
+    final controller = ExpenseController(
+      storage: storage,
+      exportService: _MemoryExportService(),
+    );
+    await controller.initialize();
+    storage.writtenMonths.clear();
+
+    await controller.add(
+      ExpenseRecord(
+        id: 'historical',
+        reason: '旧记录',
+        amount: 10,
+        date: DateTime(2024, 3, 1),
+        type: TransactionType.expense,
+        category: TransactionCategory.food,
+      ),
+    );
+
+    expect(storage.writtenMonths.toSet(), {DateTime(2024, 3)});
   });
 }
