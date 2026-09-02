@@ -264,5 +264,7 @@ flutter build apk --release --no-pub
 - `design/offline-tools-overview-v1.png`：新增离线工具后的主页面设计。
 - `design/offline-tools-details-calculation-v1.png`：计时和计算工具详情。
 - `design/offline-tools-details-productivity-v1.png`：随机、计数和文本工具详情。
+- `design/developer-tools-batch-1-v1.png`：JSON、Base64、URL、时间戳、进制转换和 UUID 工具的已确认设计。
+- `design/developer-tools-batch-2-v1.png`：正则、哈希、颜色对比度、JWT、CSV/JSON 和 Cron 工具的已确认设计。
 
 开发 UI 时应先对照这些设计，若设计之间冲突，以用户最后确认的版本为准。

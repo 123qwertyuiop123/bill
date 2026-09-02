@@ -20,8 +20,12 @@ void main() {
   });
 
   test('rejects a persisted ledger larger than the byte limit', () async {
+    final ledgerDirectory = Directory(
+      '${directory.path}${Platform.pathSeparator}消费记录',
+    );
+    await ledgerDirectory.create();
     final data = File(
-      '${directory.path}${Platform.pathSeparator}expenses.json',
+      '${ledgerDirectory.path}${Platform.pathSeparator}expenses.json',
     );
     await data.writeAsBytes(
       List<int>.filled(ExpenseStorage.maxDataFileBytes + 1, 0),

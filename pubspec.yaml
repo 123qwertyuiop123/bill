@@ -37,6 +37,8 @@ dependencies:
   path_provider: ^2.1.5
   # 纯本地绘制二维码，不申请相机或网络权限。
   qr_flutter: ^4.1.0
+  # 官方纯 Dart 哈希实现；所有输入只在本机内存中处理。
+  crypto: ^3.0.7
 
 dev_dependencies:
   flutter_test:

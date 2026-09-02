@@ -11,3 +11,63 @@ Project invariants:
 - Prefer offline, low-permission, local processing; never embed API secrets in the app.
 - Add meaningful Chinese comments around business rules, compatibility, and security boundaries.
 - Run formatting, static analysis, tests, and relevant release builds in the order defined by `DEVELOPMENT_GUIDE.md`.
+
+## Existing tool inventory and duplicate prevention
+
+Before proposing, designing, or implementing any tool, the agent must inspect both this inventory and `lib/tools/tool_registry.dart`. The registry is the source of truth. A different name, icon, category, or screen layout does not make substantially identical functionality a new tool.
+
+Current tools:
+
+| Stable ID | Name | Existing functional scope |
+|---|---|---|
+| `expense` | 收支账本 | Record income and expenses, categorize entries, calculate monthly totals, manage multiple monthly TXT files, and sync public TXT copies by year. |
+| `calculator` | 计算器 | Safe basic addition, subtraction, multiplication, and division without evaluating code. |
+| `unit_converter` | 单位换算 | Convert length, weight, and temperature units. Extend this tool instead of creating another general unit converter. |
+| `date_calculator` | 日期计算 | Calculate the interval between dates and add or subtract days from a date. |
+| `password_generator` | 密码生成 | Generate offline passwords with a cryptographically secure random source and selectable character groups. |
+| `text_tools` | 文本工具 | Count characters, words, and lines; convert letter case; trim lines; remove blank lines. General text transforms belong here when they do not need a separate workflow. |
+| `qr_code` | 二维码 | Generate a QR code locally from text or a URL. |
+| `bmi_calculator` | BMI 计算 | Calculate BMI from height and weight and show the corresponding range. |
+| `stopwatch_timer` | 秒表与倒计时 | Stopwatch, lap recording, and countdown timer. |
+| `percentage_calculator` | 百分比计算 | Calculate ratios, percentage increases/decreases, and discounts. |
+| `bill_split` | AA 分摊 | Split a total amount and additional fees among a specified number of people. |
+| `age_calculator` | 年龄计算 | Calculate age, days lived, next birthday, and birthday countdown. |
+| `random_decision` | 随机决定 | Generate random integers and perform dice, coin, and option-drawing decisions. |
+| `tally_counter` | 计数器 | Create and persist multiple independent increment/decrement counters. |
+| `text_diff` | 文本对比 | Compare two texts line by line and show added, removed, and unchanged lines. |
+| `list_processor` | 列表处理 | Parse, sort, deduplicate, shuffle, and clean line- or comma-separated lists. |
+| `json_tool` | JSON工具 | Format, minify, and validate JSON locally with bounded input size and safe parse errors. |
+| `base64_tool` | Base64 | Encode and decode bounded UTF-8 text locally; it does not treat input as a file or executable content. |
+| `url_tool` | URL 编解码 | Encode and decode URI components and parse repeated query parameters locally without opening or requesting URLs. |
+| `timestamp_converter` | Unix 时间戳 | Convert bounded Unix seconds or milliseconds to local dates and convert supported local dates back to timestamps. |
+| `number_base_converter` | 进制转换 | Convert signed arbitrary-precision integers among binary, octal, decimal, and hexadecimal with bounded input. |
+| `uuid_generator` | UUID 生成 | Generate bounded batches of UUID v4 values with the platform cryptographically secure random source; results remain in memory. |
+| `regex_tester` | 正则测试 | Test bounded regular expressions in a killable background isolate with timeout protection and bounded match output. |
+| `hash_generator` | 哈希生成 | Generate bounded UTF-8 text digests locally with MD5, SHA-1, SHA-256, or SHA-512 and warn against insecure password use. |
+| `color_contrast` | 颜色与对比度 | Parse bounded HEX colors and calculate WCAG contrast ratios and AA/AAA thresholds locally. |
+| `jwt_viewer` | JWT 查看 | Decode bounded JWT Header and Payload JSON locally, display expiry hints, and explicitly never claim signature validity. |
+| `csv_json_converter` | CSV/JSON 转换 | Convert bounded RFC-4180-style CSV tables and flat JSON object arrays locally with row, column, and output limits. |
+| `cron_parser` | Cron 解析 | Parse bounded standard five-field Cron expressions offline and calculate five future runs in the device local timezone. |
+
+Duplicate decisions already established:
+
+- Do not add another word counter, case converter, blank-line cleaner, or basic text statistics tool; extend `text_tools` when appropriate.
+- Do not add another list sorter, deduplicator, random list shuffler, or list cleaner; extend `list_processor`.
+- Do not add another text comparison or Git-style line diff screen; extend `text_diff`.
+- Do not add another basic QR generator, password generator, random picker, stopwatch, countdown, unit converter, percentage calculator, bill splitter, age calculator, or ledger under a different name.
+- A specialized calculator may remain separate only when it has a clearly different input model and user workflow, as with BMI, percentage, age, date, and bill splitting.
+
+Candidate tools checked against the current inventory:
+
+- Not currently present: Lorem Ipsum generator, CIDR calculator, Luhn checker, file-hash verifier, Markdown preview, and image resize/compression.
+- Already covered: text case conversion, word/character/line counting, list sorting/deduplication/shuffling, text diff, QR generation, password generation, general unit conversion, and random selection.
+- Partially covered: advanced text-case formats should normally extend `text_tools`; additional physical units should extend `unit_converter`; random-string generation should be evaluated against `password_generator` before becoming separate.
+
+Mandatory process for adding a tool:
+
+1. Compare the requested behavior—not only its title—with every row above and with the registry.
+2. If at least half of its primary operations already exist in one tool, prefer extending that tool unless the user explicitly approves a separate workflow.
+3. Confirm the stable ID is new and the title does not create a misleading duplicate.
+4. Obtain approval for the UI design when a new page or material UI change is required.
+5. Implement the tool in its own `lib/tools/<tool_name>/` directory and register it exactly once.
+6. Update this inventory in the same change that adds, removes, renames, or materially expands a tool. A tool change is incomplete while this inventory and the registry disagree.

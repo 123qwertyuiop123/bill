@@ -1,6 +1,6 @@
 # ZM 工具箱
 
-一款简洁、本地优先的 Flutter 多功能工具 App。当前提供 16 个离线工具，并完整保留原有收支账本、分类统计、多 TXT 账本切换和 Android 公共目录自动同步功能。
+一款简洁、本地优先的 Flutter 多功能工具 App。当前提供 28 个离线工具，并完整保留原有收支账本、分类统计、多 TXT 账本切换和 Android 公共目录自动同步功能。
 
 ![工具箱界面设计](design/multitool-ui-overview-square.png)
 
@@ -21,6 +21,18 @@
 - 可持久化的多项目计数器
 - 逐行文本对比
 - 列表排序、去重、打乱和清理
+- JSON 格式化、压缩和校验
+- Base64 UTF-8 文本编码与解码
+- URL 组件编码、解码和查询参数解析
+- Unix 秒/毫秒时间戳与本地日期互转
+- 二、八、十、十六进制任意精度整数转换
+- 使用安全随机源的 UUID v4 批量生成
+- 带超时隔离保护的正则表达式测试
+- MD5、SHA-1、SHA-256 和 SHA-512 文本哈希
+- WCAG 颜色对比度与 AA/AAA 检查
+- 只读 JWT Header、Payload 和有效期查看
+- CSV 与扁平 JSON 对象数组双向转换
+- 标准 5 段 Cron 解析和后续执行时间计算
 - 原有收支账本完整保留：
 - 记录收入和支出原因、金额、分类与日期
 - 按天查看、添加、修改和删除记录
@@ -125,7 +137,19 @@ lib/
 │   ├── random_decision/    # 随机决定
 │   ├── tally_counter/      # 计数器
 │   ├── text_diff/          # 文本对比
-│   └── list_processor/     # 列表处理
+│   ├── list_processor/     # 列表处理
+│   ├── json_tool/          # JSON 工具
+│   ├── base64_tool/        # Base64
+│   ├── url_tool/           # URL 编解码与参数解析
+│   ├── timestamp_converter/ # Unix 时间戳
+│   ├── number_base_converter/ # 进制转换
+│   ├── uuid_generator/     # UUID v4 生成
+│   ├── regex_tester/       # 正则测试
+│   ├── hash_generator/     # 哈希生成
+│   ├── color_contrast/     # 颜色与对比度
+│   ├── jwt_viewer/         # JWT 只读查看
+│   ├── csv_json_converter/ # CSV/JSON 转换
+│   └── cron_parser/        # Cron 解析
 └── expense_storage.dart    # 账本旧导入路径的兼容出口
 ```
 

@@ -2,21 +2,33 @@ import 'package:flutter/material.dart';
 
 import '../app/models/tool_definition.dart';
 import 'age_calculator/age_calculator_screen.dart';
+import 'base64_tool/base64_tool_screen.dart';
 import 'bmi_calculator/bmi_calculator_screen.dart';
 import 'bill_split/bill_split_screen.dart';
 import 'calculator/calculator_screen.dart';
+import 'color_contrast/color_contrast_screen.dart';
+import 'csv_json_converter/csv_json_converter_screen.dart';
+import 'cron_parser/cron_parser_screen.dart';
 import 'date_calculator/date_calculator_screen.dart';
 import 'expense/expense_tool_screen.dart';
+import 'hash_generator/hash_generator_screen.dart';
+import 'json_tool/json_tool_screen.dart';
+import 'jwt_viewer/jwt_viewer_screen.dart';
 import 'list_processor/list_processor_screen.dart';
+import 'number_base_converter/number_base_converter_screen.dart';
 import 'password_generator/password_generator_screen.dart';
 import 'percentage_calculator/percentage_calculator_screen.dart';
 import 'qr_code/qr_code_screen.dart';
 import 'random_decision/random_decision_screen.dart';
+import 'regex_tester/regex_tester_screen.dart';
 import 'stopwatch_timer/stopwatch_timer_screen.dart';
 import 'tally_counter/tally_counter_screen.dart';
 import 'text_diff/text_diff_screen.dart';
 import 'text_tools/text_tools_screen.dart';
+import 'timestamp_converter/timestamp_converter_screen.dart';
 import 'unit_converter/unit_converter_screen.dart';
+import 'url_tool/url_tool_screen.dart';
+import 'uuid_generator/uuid_generator_screen.dart';
 
 /// 所有工具只在这里注册一次，首页、分类、收藏和搜索共享同一数据源。
 abstract final class ToolRegistry {
@@ -149,6 +161,102 @@ abstract final class ToolRegistry {
       icon: Icons.format_list_bulleted,
       builder: _listProcessor,
     ),
+    ToolDefinition(
+      id: 'json_tool',
+      title: 'JSON工具',
+      description: '格式化、压缩与校验 JSON',
+      category: ToolCategory.text,
+      icon: Icons.data_object,
+      builder: _jsonTool,
+    ),
+    ToolDefinition(
+      id: 'base64_tool',
+      title: 'Base64',
+      description: '离线进行文本编码与解码',
+      category: ToolCategory.text,
+      icon: Icons.code_outlined,
+      builder: _base64Tool,
+    ),
+    ToolDefinition(
+      id: 'url_tool',
+      title: 'URL 编解码',
+      description: '编码、解码与查询参数解析',
+      category: ToolCategory.text,
+      icon: Icons.link,
+      builder: _urlTool,
+    ),
+    ToolDefinition(
+      id: 'timestamp_converter',
+      title: 'Unix 时间戳',
+      description: '时间戳与本地日期互相转换',
+      category: ToolCategory.calculation,
+      icon: Icons.access_time,
+      builder: _timestampConverter,
+    ),
+    ToolDefinition(
+      id: 'number_base_converter',
+      title: '进制转换',
+      description: '二、八、十、十六进制互转',
+      category: ToolCategory.calculation,
+      icon: Icons.numbers,
+      builder: _numberBaseConverter,
+    ),
+    ToolDefinition(
+      id: 'uuid_generator',
+      title: 'UUID 生成',
+      description: '安全随机生成 UUID v4',
+      category: ToolCategory.security,
+      icon: Icons.fingerprint,
+      builder: _uuidGenerator,
+    ),
+    ToolDefinition(
+      id: 'regex_tester',
+      title: '正则测试',
+      description: '安全测试表达式与匹配位置',
+      category: ToolCategory.text,
+      icon: Icons.data_array,
+      builder: _regexTester,
+    ),
+    ToolDefinition(
+      id: 'hash_generator',
+      title: '哈希生成',
+      description: '生成 MD5 与 SHA 文本摘要',
+      category: ToolCategory.security,
+      icon: Icons.tag,
+      builder: _hashGenerator,
+    ),
+    ToolDefinition(
+      id: 'color_contrast',
+      title: '颜色与对比度',
+      description: '检查文字颜色的 WCAG 对比度',
+      category: ToolCategory.productivity,
+      icon: Icons.contrast,
+      builder: _colorContrast,
+    ),
+    ToolDefinition(
+      id: 'jwt_viewer',
+      title: 'JWT 查看',
+      description: '离线查看 Header 与 Payload',
+      category: ToolCategory.security,
+      icon: Icons.policy_outlined,
+      builder: _jwtViewer,
+    ),
+    ToolDefinition(
+      id: 'csv_json_converter',
+      title: 'CSV/JSON 转换',
+      description: 'CSV 表格与 JSON 对象数组互转',
+      category: ToolCategory.text,
+      icon: Icons.table_chart_outlined,
+      builder: _csvJsonConverter,
+    ),
+    ToolDefinition(
+      id: 'cron_parser',
+      title: 'Cron 解析',
+      description: '解析计划含义与后续执行时间',
+      category: ToolCategory.productivity,
+      icon: Icons.schedule_outlined,
+      builder: _cronParser,
+    ),
   ];
 
   static Widget _expense(BuildContext context) => const ExpenseToolScreen();
@@ -177,4 +285,22 @@ abstract final class ToolRegistry {
   static Widget _textDiff(BuildContext context) => const TextDiffScreen();
   static Widget _listProcessor(BuildContext context) =>
       const ListProcessorScreen();
+  static Widget _jsonTool(BuildContext context) => const JsonToolScreen();
+  static Widget _base64Tool(BuildContext context) => const Base64ToolScreen();
+  static Widget _urlTool(BuildContext context) => const UrlToolScreen();
+  static Widget _timestampConverter(BuildContext context) =>
+      const TimestampConverterScreen();
+  static Widget _numberBaseConverter(BuildContext context) =>
+      const NumberBaseConverterScreen();
+  static Widget _uuidGenerator(BuildContext context) =>
+      const UuidGeneratorScreen();
+  static Widget _regexTester(BuildContext context) => const RegexTesterScreen();
+  static Widget _hashGenerator(BuildContext context) =>
+      const HashGeneratorScreen();
+  static Widget _colorContrast(BuildContext context) =>
+      const ColorContrastScreen();
+  static Widget _jwtViewer(BuildContext context) => const JwtViewerScreen();
+  static Widget _csvJsonConverter(BuildContext context) =>
+      const CsvJsonConverterScreen();
+  static Widget _cronParser(BuildContext context) => const CronParserScreen();
 }
