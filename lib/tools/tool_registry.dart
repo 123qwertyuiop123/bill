@@ -6,18 +6,25 @@ import 'base64_tool/base64_tool_screen.dart';
 import 'bmi_calculator/bmi_calculator_screen.dart';
 import 'bill_split/bill_split_screen.dart';
 import 'calculator/calculator_screen.dart';
+import 'chmod_calculator/chmod_calculator_screen.dart';
 import 'color_contrast/color_contrast_screen.dart';
 import 'csv_json_converter/csv_json_converter_screen.dart';
 import 'cron_parser/cron_parser_screen.dart';
 import 'date_calculator/date_calculator_screen.dart';
 import 'expense/expense_tool_screen.dart';
 import 'hash_generator/hash_generator_screen.dart';
+import 'http_status_reference/http_status_reference_screen.dart';
+import 'ipv4_subnet/ipv4_subnet_screen.dart';
 import 'json_tool/json_tool_screen.dart';
 import 'jwt_viewer/jwt_viewer_screen.dart';
 import 'list_processor/list_processor_screen.dart';
+import 'luhn_checker/luhn_checker_screen.dart';
+import 'markdown_preview/markdown_preview_screen.dart';
+import 'mime_type_reference/mime_type_reference_screen.dart';
 import 'number_base_converter/number_base_converter_screen.dart';
 import 'password_generator/password_generator_screen.dart';
 import 'percentage_calculator/percentage_calculator_screen.dart';
+import 'placeholder_text/placeholder_text_screen.dart';
 import 'qr_code/qr_code_screen.dart';
 import 'random_decision/random_decision_screen.dart';
 import 'regex_tester/regex_tester_screen.dart';
@@ -220,7 +227,7 @@ abstract final class ToolRegistry {
     ToolDefinition(
       id: 'hash_generator',
       title: '哈希生成',
-      description: '生成 MD5 与 SHA 文本摘要',
+      description: '生成文本摘要并校验文件完整性',
       category: ToolCategory.security,
       icon: Icons.tag,
       builder: _hashGenerator,
@@ -236,7 +243,7 @@ abstract final class ToolRegistry {
     ToolDefinition(
       id: 'jwt_viewer',
       title: 'JWT 查看',
-      description: '离线查看 Header 与 Payload',
+      description: '离线查看令牌头部与载荷',
       category: ToolCategory.security,
       icon: Icons.policy_outlined,
       builder: _jwtViewer,
@@ -256,6 +263,62 @@ abstract final class ToolRegistry {
       category: ToolCategory.productivity,
       icon: Icons.schedule_outlined,
       builder: _cronParser,
+    ),
+    ToolDefinition(
+      id: 'placeholder_text',
+      title: '占位文本',
+      description: '生成中文或拉丁排版示例',
+      category: ToolCategory.text,
+      icon: Icons.notes_outlined,
+      builder: _placeholderText,
+    ),
+    ToolDefinition(
+      id: 'ipv4_subnet',
+      title: 'IPv4 子网计算',
+      description: '离线计算网络范围与掩码',
+      category: ToolCategory.calculation,
+      icon: Icons.lan_outlined,
+      builder: _ipv4Subnet,
+    ),
+    ToolDefinition(
+      id: 'chmod_calculator',
+      title: '权限计算',
+      description: 'Unix 权限勾选与八进制互转',
+      category: ToolCategory.calculation,
+      icon: Icons.rule_outlined,
+      builder: _chmodCalculator,
+    ),
+    ToolDefinition(
+      id: 'luhn_checker',
+      title: 'Luhn 校验',
+      description: '检查数字序列或生成校验位',
+      category: ToolCategory.calculation,
+      icon: Icons.fact_check_outlined,
+      builder: _luhnChecker,
+    ),
+    ToolDefinition(
+      id: 'markdown_preview',
+      title: 'Markdown 预览',
+      description: '安全预览常用 Markdown 排版',
+      category: ToolCategory.text,
+      icon: Icons.preview_outlined,
+      builder: _markdownPreview,
+    ),
+    ToolDefinition(
+      id: 'http_status_reference',
+      title: 'HTTP 状态码',
+      description: '离线查询状态含义与处理建议',
+      category: ToolCategory.productivity,
+      icon: Icons.http_outlined,
+      builder: _httpStatusReference,
+    ),
+    ToolDefinition(
+      id: 'mime_type_reference',
+      title: 'MIME 类型',
+      description: '按扩展名或媒体类型离线查询',
+      category: ToolCategory.productivity,
+      icon: Icons.description_outlined,
+      builder: _mimeTypeReference,
     ),
   ];
 
@@ -303,4 +366,16 @@ abstract final class ToolRegistry {
   static Widget _csvJsonConverter(BuildContext context) =>
       const CsvJsonConverterScreen();
   static Widget _cronParser(BuildContext context) => const CronParserScreen();
+  static Widget _placeholderText(BuildContext context) =>
+      const PlaceholderTextScreen();
+  static Widget _ipv4Subnet(BuildContext context) => const Ipv4SubnetScreen();
+  static Widget _chmodCalculator(BuildContext context) =>
+      const ChmodCalculatorScreen();
+  static Widget _luhnChecker(BuildContext context) => const LuhnCheckerScreen();
+  static Widget _markdownPreview(BuildContext context) =>
+      const MarkdownPreviewScreen();
+  static Widget _httpStatusReference(BuildContext context) =>
+      const HttpStatusReferenceScreen();
+  static Widget _mimeTypeReference(BuildContext context) =>
+      const MimeTypeReferenceScreen();
 }

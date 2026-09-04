@@ -7,12 +7,14 @@ import 'package:bill/tools/cron_parser/cron_parser_screen.dart';
 import 'package:bill/tools/cron_parser/cron_parser_service.dart';
 import 'package:bill/tools/hash_generator/hash_generator_logic.dart';
 import 'package:bill/tools/hash_generator/hash_generator_screen.dart';
+import 'package:bill/tools/hash_generator/services/file_hash_service.dart';
 import 'package:bill/tools/jwt_viewer/jwt_viewer_logic.dart';
 import 'package:bill/tools/jwt_viewer/jwt_viewer_screen.dart';
 import 'package:bill/tools/regex_tester/regex_tester_logic.dart';
 import 'package:bill/tools/regex_tester/regex_tester_screen.dart';
 import 'package:bill/tools/regex_tester/regex_tester_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -94,6 +96,13 @@ void main() {
   });
 
   group('hash generator', () {
+    const channel = MethodChannel('com.zm.bill/file_hash');
+
+    tearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
+    });
+
     test('generates standard UTF-8 digests', () {
       expect(
         generateTextHash('abc', HashAlgorithm.sha256).digest,
@@ -116,6 +125,39 @@ void main() {
       );
     });
 
+    test('validates expected digests without accepting partial values', () {
+      const digest =
+          'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad';
+      expect(isValidDigest(digest, HashAlgorithm.sha256), isTrue);
+      expect(
+        digestsMatch(digest, digest.toUpperCase(), HashAlgorithm.sha256),
+        isTrue,
+      );
+      expect(
+        digestsMatch(digest, digest.substring(1), HashAlgorithm.sha256),
+        isFalse,
+      );
+    });
+
+    test('validates the native file hash response', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+            expect(call.method, 'pickAndHashFile');
+            expect(call.arguments, {'algorithm': 'SHA-256'});
+            return <String, Object>{
+              'name': 'example.zip',
+              'size': 1024,
+              'digest': 'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad',
+            };
+          });
+
+      final result = await const FileHashService().pickAndHash(
+        HashAlgorithm.sha256,
+      );
+      expect(result?.name, 'example.zip');
+      expect(result?.size, 1024);
+    });
+
     testWidgets('generate button writes a hash', (tester) async {
       await tester.pumpWidget(const MaterialApp(home: HashGeneratorScreen()));
       await tester.tap(find.text('生成哈希'));
@@ -125,6 +167,32 @@ void main() {
         find.byKey(const Key('hashOutput')),
       );
       expect(output.controller?.text, hasLength(64));
+    });
+
+    testWidgets('file mode compares the expected digest', (tester) async {
+      const digest =
+          'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad';
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+            channel,
+            (_) async => <String, Object>{
+              'name': 'example.zip',
+              'size': 1024,
+              'digest': digest,
+            },
+          );
+      await tester.pumpWidget(const MaterialApp(home: HashGeneratorScreen()));
+
+      await tester.tap(find.text('文件校验'));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('pickHashFile')));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.byKey(const Key('expectedDigest')));
+      await tester.enterText(find.byKey(const Key('expectedDigest')), digest);
+      await tester.pump();
+
+      expect(find.text('example.zip'), findsOneWidget);
+      expect(find.text('校验一致'), findsOneWidget);
     });
   });
 

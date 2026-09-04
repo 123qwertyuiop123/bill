@@ -13,7 +13,26 @@ extension HashAlgorithmLabel on HashAlgorithm {
     HashAlgorithm.sha256 => 'SHA-256',
     HashAlgorithm.sha512 => 'SHA-512',
   };
+
+  String get platformName => label;
+
+  int get digestLength => switch (this) {
+    HashAlgorithm.md5 => 32,
+    HashAlgorithm.sha1 => 40,
+    HashAlgorithm.sha256 => 64,
+    HashAlgorithm.sha512 => 128,
+  };
 }
+
+/// 只接受当前算法长度完全匹配的十六进制摘要，避免宽松比较造成误判。
+bool isValidDigest(String input, HashAlgorithm algorithm) =>
+    input.length == algorithm.digestLength &&
+    RegExp(r'^[0-9a-fA-F]+$').hasMatch(input);
+
+bool digestsMatch(String actual, String expected, HashAlgorithm algorithm) =>
+    isValidDigest(actual, algorithm) &&
+    isValidDigest(expected.trim(), algorithm) &&
+    actual.toLowerCase() == expected.trim().toLowerCase();
 
 class HashToolResult {
   const HashToolResult({this.digest = '', this.error});

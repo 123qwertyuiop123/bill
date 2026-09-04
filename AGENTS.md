@@ -43,11 +43,18 @@ Current tools:
 | `number_base_converter` | 进制转换 | Convert signed arbitrary-precision integers among binary, octal, decimal, and hexadecimal with bounded input. |
 | `uuid_generator` | UUID 生成 | Generate bounded batches of UUID v4 values with the platform cryptographically secure random source; results remain in memory. |
 | `regex_tester` | 正则测试 | Test bounded regular expressions in a killable background isolate with timeout protection and bounded match output. |
-| `hash_generator` | 哈希生成 | Generate bounded UTF-8 text digests locally with MD5, SHA-1, SHA-256, or SHA-512 and warn against insecure password use. |
+| `hash_generator` | 哈希生成 | Generate bounded UTF-8 text digests or stream a user-selected Android file up to 512 MB through the system document picker for MD5/SHA verification; never upload, modify, log, or persist file content or paths. |
 | `color_contrast` | 颜色与对比度 | Parse bounded HEX colors and calculate WCAG contrast ratios and AA/AAA thresholds locally. |
 | `jwt_viewer` | JWT 查看 | Decode bounded JWT Header and Payload JSON locally, display expiry hints, and explicitly never claim signature validity. |
 | `csv_json_converter` | CSV/JSON 转换 | Convert bounded RFC-4180-style CSV tables and flat JSON object arrays locally with row, column, and output limits. |
 | `cron_parser` | Cron 解析 | Parse bounded standard five-field Cron expressions offline and calculate five future runs in the device local timezone. |
+| `placeholder_text` | 占位文本 | Generate bounded Chinese or Latin layout samples by paragraph and sentence counts; no text editing or persistence. |
+| `ipv4_subnet` | IPv4 子网计算 | Calculate IPv4 network, mask, broadcast and usable range from CIDR, including /31 and /32; never scan or enumerate hosts. |
+| `chmod_calculator` | 权限计算 | Convert three-digit octal Unix permissions and nine read/write/execute checkboxes; no special bits, commands or file changes. |
+| `luhn_checker` | Luhn 校验 | Validate bounded ASCII digit sequences or append a Luhn check digit; never claim real-world validity or persist numbers. |
+| `markdown_preview` | Markdown 预览 | Render a bounded safe Markdown subset locally; never execute HTML or scripts, load remote resources, or automatically open links. |
+| `http_status_reference` | HTTP 状态码 | Search an offline catalog of common HTTP status meanings, scenarios and handling advice; never send HTTP requests. |
+| `mime_type_reference` | MIME 类型 | Query a bounded built-in extension-to-MIME table in either direction; never read or sniff files. |
 
 Duplicate decisions already established:
 
@@ -59,7 +66,9 @@ Duplicate decisions already established:
 
 Candidate tools checked against the current inventory:
 
-- Not currently present: Lorem Ipsum generator, CIDR calculator, Luhn checker, file-hash verifier, Markdown preview, and image resize/compression.
+- Now covered: Chinese/Latin placeholder text, IPv4 CIDR calculation, ordinary Unix permission calculation and Luhn checking; extend their existing modules instead of adding duplicates.
+- Now covered: file-hash verification extends `hash_generator`; Markdown preview, offline HTTP status reference and MIME type reference each use their dedicated workflow. Extend these modules instead of adding duplicates.
+- Not currently present: image resize/compression. Review decoder memory limits, metadata handling and Android output storage before proposing it.
 - Already covered: text case conversion, word/character/line counting, list sorting/deduplication/shuffling, text diff, QR generation, password generation, general unit conversion, and random selection.
 - Partially covered: advanced text-case formats should normally extend `text_tools`; additional physical units should extend `unit_converter`; random-string generation should be evaluated against `password_generator` before becoming separate.
 

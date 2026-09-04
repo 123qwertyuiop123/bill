@@ -89,7 +89,7 @@ class _JwtViewerScreenState extends State<JwtViewerScreen> {
           maxLines: 8,
           maxLength: maxJwtInputLength,
           decoration: const InputDecoration(
-            labelText: 'JWT Token',
+            labelText: 'JWT 令牌',
             alignLabelWithHint: true,
           ),
         ),
@@ -105,8 +105,8 @@ class _JwtViewerScreenState extends State<JwtViewerScreen> {
         const SizedBox(height: 14),
         SegmentedButton<JwtSection>(
           segments: const [
-            ButtonSegment(value: JwtSection.header, label: Text('Header')),
-            ButtonSegment(value: JwtSection.payload, label: Text('Payload')),
+            ButtonSegment(value: JwtSection.header, label: Text('头部')),
+            ButtonSegment(value: JwtSection.payload, label: Text('载荷')),
           ],
           selected: {section},
           showSelectedIcon: false,
@@ -121,8 +121,8 @@ class _JwtViewerScreenState extends State<JwtViewerScreen> {
           maxLines: 14,
           decoration: InputDecoration(
             labelText: section == JwtSection.header
-                ? 'Header JSON'
-                : 'Payload JSON',
+                ? '头部内容（JSON）'
+                : '载荷内容（JSON）',
             alignLabelWithHint: true,
             suffixIcon: IconButton(
               tooltip: '复制',

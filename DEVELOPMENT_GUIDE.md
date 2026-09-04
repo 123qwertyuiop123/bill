@@ -192,6 +192,7 @@ lib/tools/<tool_name>/
 ## 12. 注释与命名
 
 - 文件、类和方法使用清晰英文命名；用户界面使用简体中文。
+- 内置日期/时间选择器、文本操作菜单必须使用 SDK 中文本地化；普通标签和错误提示不得直接透出英文或原始异常。JSON、UUID 等标准标识及用户数据键名保留原样。
 - 注释解释“为什么”和安全边界，不重复代码字面含义。
 - 公开类和关键业务函数使用 `///` 文档注释。
 - 复杂格式、兼容分支、平台限制和异常降级必须写注释。
@@ -266,5 +267,7 @@ flutter build apk --release --no-pub
 - `design/offline-tools-details-productivity-v1.png`：随机、计数和文本工具详情。
 - `design/developer-tools-batch-1-v1.png`：JSON、Base64、URL、时间戳、进制转换和 UUID 工具的已确认设计。
 - `design/developer-tools-batch-2-v1.png`：正则、哈希、颜色对比度、JWT、CSV/JSON 和 Cron 工具的已确认设计。
+- `design/offline-tools-batch-3-v1.png`：占位文本、IPv4 子网计算、权限计算和 Luhn 校验的已确认设计；状态和边界见同目录 `offline-tools-batch-3-proposal.md`。
+- `design/offline-tools-batch-4-v1.png`：文件哈希校验、Markdown 预览、HTTP 状态码和 MIME 类型的已确认设计；去重与安全边界见同目录 `offline-tools-batch-4-proposal.md`。
 
 开发 UI 时应先对照这些设计，若设计之间冲突，以用户最后确认的版本为准。

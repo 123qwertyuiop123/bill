@@ -1,12 +1,13 @@
 # ZM 工具箱
 
-一款简洁、本地优先的 Flutter 多功能工具 App。当前提供 28 个离线工具，并完整保留原有收支账本、分类统计、多 TXT 账本切换和 Android 公共目录自动同步功能。
+一款简洁、本地优先的 Flutter 多功能工具 App。当前提供 35 个离线工具，并完整保留原有收支账本、分类统计、多 TXT 账本切换和 Android 公共目录自动同步功能。
 
 ![工具箱界面设计](design/multitool-ui-overview-square.png)
 
 ## 功能
 
 - 工具箱首页、分类筛选、搜索、收藏和最近使用
+- 简体中文界面，内置日期、时间选择器及文本操作菜单统一使用中文
 - 基础计算器（不执行输入代码）
 - 长度、重量和温度单位换算
 - 日期间隔和日期推算
@@ -28,11 +29,18 @@
 - 二、八、十、十六进制任意精度整数转换
 - 使用安全随机源的 UUID v4 批量生成
 - 带超时隔离保护的正则表达式测试
-- MD5、SHA-1、SHA-256 和 SHA-512 文本哈希
+- MD5、SHA-1、SHA-256 和 SHA-512 文本哈希，以及 Android 系统文件选择器提供的只读文件完整性校验（最大 512 MB）
 - WCAG 颜色对比度与 AA/AAA 检查
 - 只读 JWT Header、Payload 和有效期查看
 - CSV 与扁平 JSON 对象数组双向转换
 - 标准 5 段 Cron 解析和后续执行时间计算
+- 中文 / 拉丁占位文本，按段数与句数生成，最多 20 段、每段 10 句
+- IPv4 子网计算，支持 /0–/32，不扫描网络或枚举主机
+- 三位 Unix 权限与勾选互转，不执行命令或修改文件
+- Luhn 数字序列校验与校验位生成，不代表号码真实有效；不保存输入
+- 安全 Markdown 子集预览，不执行 HTML、脚本或网络资源
+- 常用 HTTP 状态码离线查询，不发送网络请求
+- 常见扩展名与 MIME 类型离线查询，不读取或嗅探文件
 - 原有收支账本完整保留：
 - 记录收入和支出原因、金额、分类与日期
 - 按天查看、添加、修改和删除记录
@@ -145,11 +153,18 @@ lib/
 │   ├── number_base_converter/ # 进制转换
 │   ├── uuid_generator/     # UUID v4 生成
 │   ├── regex_tester/       # 正则测试
-│   ├── hash_generator/     # 哈希生成
+│   ├── hash_generator/     # 文本哈希与文件完整性校验
 │   ├── color_contrast/     # 颜色与对比度
 │   ├── jwt_viewer/         # JWT 只读查看
 │   ├── csv_json_converter/ # CSV/JSON 转换
-│   └── cron_parser/        # Cron 解析
+│   ├── cron_parser/        # Cron 解析
+│   ├── placeholder_text/   # 占位文本
+│   ├── ipv4_subnet/        # IPv4 子网计算
+│   ├── chmod_calculator/   # Unix 权限计算
+│   ├── luhn_checker/       # Luhn 校验
+│   ├── markdown_preview/   # Markdown 预览
+│   ├── http_status_reference/ # HTTP 状态码
+│   └── mime_type_reference/ # MIME 类型
 └── expense_storage.dart    # 账本旧导入路径的兼容出口
 ```
 

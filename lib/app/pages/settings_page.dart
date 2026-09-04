@@ -51,7 +51,7 @@ class SettingsPage extends StatelessWidget {
         const ListTile(
           leading: Icon(Icons.info_outline),
           title: Text('ZM 工具箱'),
-          subtitle: Text('版本 1.0.0 · 16 个离线工具'),
+          subtitle: Text('版本 1.0.0 · 35 个离线工具'),
         ),
       ],
     ),

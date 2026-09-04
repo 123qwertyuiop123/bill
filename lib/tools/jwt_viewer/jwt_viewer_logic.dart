@@ -24,13 +24,13 @@ class JwtViewerResult {
 /// 只查看 JWT 紧凑格式中的 JSON，不校验签名，也不应据此信任任何声明。
 JwtViewerResult parseJwtForViewing(String input, {DateTime? now}) {
   final token = input.trim();
-  if (token.isEmpty) return const JwtViewerResult(error: '请输入 JWT Token');
+  if (token.isEmpty) return const JwtViewerResult(error: '请输入 JWT 令牌');
   if (token.length > maxJwtInputLength) {
-    return const JwtViewerResult(error: 'Token 不能超过 100000 个字符');
+    return const JwtViewerResult(error: '令牌不能超过 100000 个字符');
   }
   final segments = token.split('.');
   if (segments.length != 3 || segments[0].isEmpty || segments[1].isEmpty) {
-    return const JwtViewerResult(error: 'JWT 应包含 Header、Payload 和签名三段');
+    return const JwtViewerResult(error: 'JWT 应包含头部、载荷和签名三段');
   }
 
   try {
@@ -60,8 +60,8 @@ Map<String, Object?> _decodeJsonObject(String segment) {
 }
 
 String _expiryStatus(Object? value, DateTime now) {
-  if (value == null) return '未提供 exp';
-  if (value is! num || !value.isFinite) return 'exp 格式无效';
+  if (value == null) return '未提供过期时间（exp）';
+  if (value is! num || !value.isFinite) return '过期时间（exp）格式无效';
   try {
     final expiry = DateTime.fromMillisecondsSinceEpoch(
       (value * 1000).round(),
@@ -69,6 +69,6 @@ String _expiryStatus(Object? value, DateTime now) {
     );
     return expiry.isAfter(now.toUtc()) ? '未过期（未验证）' : '已过期';
   } on RangeError {
-    return 'exp 超出范围';
+    return '过期时间（exp）超出范围';
   }
 }

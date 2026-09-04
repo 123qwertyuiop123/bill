@@ -62,7 +62,13 @@ String _csvToJson(String input) {
 }
 
 String _jsonToCsv(String input) {
-  final decoded = jsonDecode(input);
+  final Object? decoded;
+  try {
+    decoded = jsonDecode(input);
+  } on FormatException {
+    // SDK 原始解析错误为英文且可能包含输入片段，只返回可处理的中文提示。
+    throw const FormatException('JSON 格式无效，请检查括号、引号和逗号');
+  }
   if (decoded is! List || decoded.isEmpty) {
     throw const FormatException('JSON 必须是非空对象数组');
   }

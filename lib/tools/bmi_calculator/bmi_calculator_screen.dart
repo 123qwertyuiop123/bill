@@ -63,7 +63,7 @@ class _BmiCalculatorScreenState extends State<BmiCalculatorScreen> {
           inputFormatters: [
             FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
           ],
-          decoration: const InputDecoration(labelText: '身高', suffixText: 'cm'),
+          decoration: const InputDecoration(labelText: '身高', suffixText: '厘米'),
         ),
         const SizedBox(height: 14),
         TextField(
@@ -72,7 +72,7 @@ class _BmiCalculatorScreenState extends State<BmiCalculatorScreen> {
           inputFormatters: [
             FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
           ],
-          decoration: const InputDecoration(labelText: '体重', suffixText: 'kg'),
+          decoration: const InputDecoration(labelText: '体重', suffixText: '千克'),
         ),
         const SizedBox(height: 20),
         FilledButton(onPressed: _calculate, child: const Text('计算 BMI')),
