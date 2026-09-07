@@ -25,7 +25,7 @@ Current tools:
 | `unit_converter` | 单位换算 | Convert length, weight, and temperature units. Extend this tool instead of creating another general unit converter. |
 | `date_calculator` | 日期计算 | Calculate the interval between dates and add or subtract days from a date. |
 | `password_generator` | 密码生成 | Generate offline passwords with a cryptographically secure random source and selectable character groups. |
-| `text_tools` | 文本工具 | Count characters, words, and lines; convert letter case; trim lines; remove blank lines. General text transforms belong here when they do not need a separate workflow. |
+| `text_tools` | 文本工具 | Count characters, words, and lines; convert letter case; trim lines; remove blank lines; encode and strictly decode bounded HTML entities. General text transforms belong here when they do not need a separate workflow. |
 | `qr_code` | 二维码 | Generate a QR code locally from text or a URL. |
 | `bmi_calculator` | BMI 计算 | Calculate BMI from height and weight and show the corresponding range. |
 | `stopwatch_timer` | 秒表与倒计时 | Stopwatch, lap recording, and countdown timer. |
@@ -43,7 +43,7 @@ Current tools:
 | `number_base_converter` | 进制转换 | Convert signed arbitrary-precision integers among binary, octal, decimal, and hexadecimal with bounded input. |
 | `uuid_generator` | UUID 生成 | Generate bounded batches of UUID v4 values with the platform cryptographically secure random source; results remain in memory. |
 | `regex_tester` | 正则测试 | Test bounded regular expressions in a killable background isolate with timeout protection and bounded match output. |
-| `hash_generator` | 哈希生成 | Generate bounded UTF-8 text digests or stream a user-selected Android file up to 512 MB through the system document picker for MD5/SHA verification; never upload, modify, log, or persist file content or paths. |
+| `hash_generator` | 哈希生成 | Generate bounded UTF-8 text digests, SHA-256/SHA-512 HMAC values, or stream a user-selected Android file up to 512 MB through the system document picker for MD5/SHA verification; never upload, modify, log, or persist file content, keys, or paths. |
 | `color_contrast` | 颜色与对比度 | Parse bounded HEX colors and calculate WCAG contrast ratios and AA/AAA thresholds locally. |
 | `jwt_viewer` | JWT 查看 | Decode bounded JWT Header and Payload JSON locally, display expiry hints, and explicitly never claim signature validity. |
 | `csv_json_converter` | CSV/JSON 转换 | Convert bounded RFC-4180-style CSV tables and flat JSON object arrays locally with row, column, and output limits. |
@@ -55,6 +55,8 @@ Current tools:
 | `markdown_preview` | Markdown 预览 | Render a bounded safe Markdown subset locally; never execute HTML or scripts, load remote resources, or automatically open links. |
 | `http_status_reference` | HTTP 状态码 | Search an offline catalog of common HTTP status meanings, scenarios and handling advice; never send HTTP requests. |
 | `mime_type_reference` | MIME 类型 | Query a bounded built-in extension-to-MIME table in either direction; never read or sniff files. |
+| `image_optimizer` | 图片优化 | Select one JPEG/PNG/WebP image through Android's system picker, enforce 20 MB and 24-megapixel limits, resize/compress it off the UI thread, remove metadata by re-encoding, and explicitly save a result to the public Pictures directory. Never upload images or move image bytes through Dart. |
+| `aspect_ratio_calculator` | 宽高比计算 | Reduce integer dimensions to a ratio and calculate bounded aspect-preserving target dimensions locally. |
 
 Duplicate decisions already established:
 
@@ -68,7 +70,8 @@ Candidate tools checked against the current inventory:
 
 - Now covered: Chinese/Latin placeholder text, IPv4 CIDR calculation, ordinary Unix permission calculation and Luhn checking; extend their existing modules instead of adding duplicates.
 - Now covered: file-hash verification extends `hash_generator`; Markdown preview, offline HTTP status reference and MIME type reference each use their dedicated workflow. Extend these modules instead of adding duplicates.
-- Not currently present: image resize/compression. Review decoder memory limits, metadata handling and Android output storage before proposing it.
+- Now covered: image resize/compression belongs to `image_optimizer`; aspect-ratio reduction and dimension scaling belong to `aspect_ratio_calculator`. Extend these modules instead of adding duplicates.
+- Now covered: HMAC belongs to `hash_generator`, and HTML entity conversion belongs to `text_tools`; extend those modules instead of adding duplicates.
 - Already covered: text case conversion, word/character/line counting, list sorting/deduplication/shuffling, text diff, QR generation, password generation, general unit conversion, and random selection.
 - Partially covered: advanced text-case formats should normally extend `text_tools`; additional physical units should extend `unit_converter`; random-string generation should be evaluated against `password_generator` before becoming separate.
 

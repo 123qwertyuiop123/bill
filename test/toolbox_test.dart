@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('tool registry uses unique stable ids', () {
     final ids = ToolRegistry.tools.map((tool) => tool.id).toList();
-    expect(ToolRegistry.tools, hasLength(35));
+    expect(ToolRegistry.tools, hasLength(37));
     expect(ids.toSet(), hasLength(ids.length));
     expect(ids, contains('expense'));
     expect(ids, contains('json_tool'));
@@ -31,6 +31,8 @@ void main() {
         'markdown_preview',
         'http_status_reference',
         'mime_type_reference',
+        'image_optimizer',
+        'aspect_ratio_calculator',
       ]),
     );
   });

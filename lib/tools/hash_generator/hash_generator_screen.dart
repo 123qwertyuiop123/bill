@@ -6,7 +6,7 @@ import '../../core/app_theme.dart';
 import 'hash_generator_logic.dart';
 import 'services/file_hash_service.dart';
 
-enum _HashMode { text, file }
+enum _HashMode { text, file, hmac }
 
 class HashGeneratorScreen extends StatefulWidget {
   const HashGeneratorScreen({
@@ -24,17 +24,20 @@ class _HashGeneratorScreenState extends State<HashGeneratorScreen> {
   final inputController = TextEditingController(text: 'ZM工具箱');
   final outputController = TextEditingController();
   final expectedController = TextEditingController();
+  final secretController = TextEditingController();
   HashAlgorithm algorithm = HashAlgorithm.sha256;
   _HashMode mode = _HashMode.text;
   FileHashResult? fileResult;
   String? error;
   bool busy = false;
+  bool obscureSecret = true;
 
   @override
   void dispose() {
     inputController.dispose();
     outputController.dispose();
     expectedController.dispose();
+    secretController.dispose();
     super.dispose();
   }
 
@@ -46,6 +49,18 @@ class _HashGeneratorScreenState extends State<HashGeneratorScreen> {
 
   void _generateText() {
     final result = generateTextHash(inputController.text, algorithm);
+    setState(() {
+      error = result.error;
+      outputController.text = result.digest;
+    });
+  }
+
+  void _generateHmac() {
+    final result = generateHmac(
+      secretController.text,
+      inputController.text,
+      algorithm,
+    );
     setState(() {
       error = result.error;
       outputController.text = result.digest;
@@ -95,12 +110,13 @@ class _HashGeneratorScreenState extends State<HashGeneratorScreen> {
     child: ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        const Text('文本摘要与文件完整性校验'),
+        const Text('文本摘要、文件校验与 HMAC'),
         const SizedBox(height: 16),
         SegmentedButton<_HashMode>(
           segments: const [
             ButtonSegment(value: _HashMode.text, label: Text('文本哈希')),
             ButtonSegment(value: _HashMode.file, label: Text('文件校验')),
+            ButtonSegment(value: _HashMode.hmac, label: Text('HMAC')),
           ],
           selected: {mode},
           showSelectedIcon: false,
@@ -108,6 +124,11 @@ class _HashGeneratorScreenState extends State<HashGeneratorScreen> {
               ? null
               : (selection) => setState(() {
                   mode = selection.first;
+                  if (mode == _HashMode.hmac &&
+                      algorithm != HashAlgorithm.sha256 &&
+                      algorithm != HashAlgorithm.sha512) {
+                    algorithm = HashAlgorithm.sha256;
+                  }
                   _resetResult();
                 }),
         ),
@@ -116,7 +137,12 @@ class _HashGeneratorScreenState extends State<HashGeneratorScreen> {
           scrollDirection: Axis.horizontal,
           child: SegmentedButton<HashAlgorithm>(
             segments: [
-              for (final item in HashAlgorithm.values)
+              for (final item in HashAlgorithm.values.where(
+                (item) =>
+                    mode != _HashMode.hmac ||
+                    item == HashAlgorithm.sha256 ||
+                    item == HashAlgorithm.sha512,
+              ))
                 ButtonSegment(value: item, label: Text(item.label)),
             ],
             selected: {algorithm},
@@ -132,8 +158,10 @@ class _HashGeneratorScreenState extends State<HashGeneratorScreen> {
         const SizedBox(height: 16),
         if (mode == _HashMode.text)
           ..._buildTextMode()
+        else if (mode == _HashMode.file)
+          ..._buildFileMode()
         else
-          ..._buildFileMode(),
+          ..._buildHmacMode(),
       ],
     ),
   );
@@ -145,6 +173,7 @@ class _HashGeneratorScreenState extends State<HashGeneratorScreen> {
       minLines: 7,
       maxLines: 12,
       maxLength: maxHashInputLength,
+      maxLengthEnforcement: MaxLengthEnforcement.none,
       decoration: const InputDecoration(
         labelText: '输入文本',
         alignLabelWithHint: true,
@@ -217,6 +246,7 @@ class _HashGeneratorScreenState extends State<HashGeneratorScreen> {
         key: const Key('expectedDigest'),
         controller: expectedController,
         maxLength: algorithm.digestLength,
+        maxLengthEnforcement: MaxLengthEnforcement.none,
         autocorrect: false,
         enableSuggestions: false,
         decoration: InputDecoration(
@@ -251,12 +281,76 @@ class _HashGeneratorScreenState extends State<HashGeneratorScreen> {
       ),
     ];
   }
+
+  List<Widget> _buildHmacMode() => [
+    TextField(
+      key: const Key('hmacSecret'),
+      controller: secretController,
+      obscureText: obscureSecret,
+      maxLength: maxHmacKeyLength,
+      maxLengthEnforcement: MaxLengthEnforcement.none,
+      autocorrect: false,
+      enableSuggestions: false,
+      decoration: InputDecoration(
+        labelText: '共享密钥',
+        suffixIcon: IconButton(
+          tooltip: obscureSecret ? '显示密钥' : '隐藏密钥',
+          onPressed: () => setState(() => obscureSecret = !obscureSecret),
+          icon: Icon(
+            obscureSecret
+                ? Icons.visibility_outlined
+                : Icons.visibility_off_outlined,
+          ),
+        ),
+      ),
+      onChanged: (_) => setState(_resetResult),
+    ),
+    const SizedBox(height: 12),
+    TextField(
+      key: const Key('hmacMessage'),
+      controller: inputController,
+      minLines: 4,
+      maxLines: 8,
+      maxLength: maxHashInputLength,
+      maxLengthEnforcement: MaxLengthEnforcement.none,
+      decoration: const InputDecoration(
+        labelText: '消息内容',
+        alignLabelWithHint: true,
+      ),
+      onChanged: (_) => setState(_resetResult),
+    ),
+    if (error != null) _ErrorText(error!),
+    FilledButton(
+      key: const Key('generateHmac'),
+      onPressed: _generateHmac,
+      child: const Text('生成 HMAC'),
+    ),
+    const SizedBox(height: 16),
+    _DigestField(controller: outputController, label: 'HMAC 结果'),
+    const SizedBox(height: 8),
+    OutlinedButton.icon(
+      onPressed: outputController.text.isEmpty ? null : _copy,
+      icon: const Icon(Icons.copy_outlined),
+      label: const Text('复制结果'),
+    ),
+    const SizedBox(height: 12),
+    const Card(
+      margin: EdgeInsets.zero,
+      child: Padding(
+        padding: EdgeInsets.all(12),
+        child: Text('HMAC 用于消息认证，不是加密或密码哈希'),
+      ),
+    ),
+    const SizedBox(height: 8),
+    const Text('密钥和内容仅保留在当前页面', style: TextStyle(color: AppColors.muted)),
+  ];
 }
 
 class _DigestField extends StatelessWidget {
-  const _DigestField({required this.controller});
+  const _DigestField({required this.controller, this.label = '文件摘要 / 哈希结果'});
 
   final TextEditingController controller;
+  final String label;
 
   @override
   Widget build(BuildContext context) => TextField(
@@ -265,10 +359,7 @@ class _DigestField extends StatelessWidget {
     readOnly: true,
     minLines: 3,
     maxLines: 6,
-    decoration: const InputDecoration(
-      labelText: '文件摘要 / 哈希结果',
-      alignLabelWithHint: true,
-    ),
+    decoration: InputDecoration(labelText: label, alignLabelWithHint: true),
   );
 }
 

@@ -1,6 +1,6 @@
 # ZM 工具箱
 
-一款简洁、本地优先的 Flutter 多功能工具 App。当前提供 35 个离线工具，并完整保留原有收支账本、分类统计、多 TXT 账本切换和 Android 公共目录自动同步功能。
+一款简洁、本地优先的 Flutter 多功能工具 App。当前提供 37 个离线工具，并完整保留原有收支账本、分类统计、多 TXT 账本切换和 Android 公共目录自动同步功能。
 
 ![工具箱界面设计](design/multitool-ui-overview-square.png)
 
@@ -12,7 +12,7 @@
 - 长度、重量和温度单位换算
 - 日期间隔和日期推算
 - 使用安全随机数的本地密码生成器
-- 文本字数统计、大小写转换和空行清理
+- 文本字数统计、大小写转换、空行清理和 HTML 实体编解码
 - 纯本地二维码生成
 - BMI 计算
 - 秒表与倒计时
@@ -29,7 +29,7 @@
 - 二、八、十、十六进制任意精度整数转换
 - 使用安全随机源的 UUID v4 批量生成
 - 带超时隔离保护的正则表达式测试
-- MD5、SHA-1、SHA-256 和 SHA-512 文本哈希，以及 Android 系统文件选择器提供的只读文件完整性校验（最大 512 MB）
+- MD5、SHA-1、SHA-256 和 SHA-512 文本哈希，SHA-256/SHA-512 HMAC，以及 Android 系统文件选择器提供的只读文件完整性校验（最大 512 MB）
 - WCAG 颜色对比度与 AA/AAA 检查
 - 只读 JWT Header、Payload 和有效期查看
 - CSV 与扁平 JSON 对象数组双向转换
@@ -41,6 +41,8 @@
 - 安全 Markdown 子集预览，不执行 HTML、脚本或网络资源
 - 常用 HTTP 状态码离线查询，不发送网络请求
 - 常见扩展名与 MIME 类型离线查询，不读取或嗅探文件
+- JPEG、PNG 和 WebP 图片离线压缩、缩放与格式转换，默认移除元数据，输出保存到 `Pictures/ZM工具箱`
+- 宽高比约分与等比尺寸换算
 - 原有收支账本完整保留：
 - 记录收入和支出原因、金额、分类与日期
 - 按天查看、添加、修改和删除记录
@@ -153,7 +155,7 @@ lib/
 │   ├── number_base_converter/ # 进制转换
 │   ├── uuid_generator/     # UUID v4 生成
 │   ├── regex_tester/       # 正则测试
-│   ├── hash_generator/     # 文本哈希与文件完整性校验
+│   ├── hash_generator/     # 文本/文件哈希与 HMAC
 │   ├── color_contrast/     # 颜色与对比度
 │   ├── jwt_viewer/         # JWT 只读查看
 │   ├── csv_json_converter/ # CSV/JSON 转换
@@ -164,7 +166,9 @@ lib/
 │   ├── luhn_checker/       # Luhn 校验
 │   ├── markdown_preview/   # Markdown 预览
 │   ├── http_status_reference/ # HTTP 状态码
-│   └── mime_type_reference/ # MIME 类型
+│   ├── mime_type_reference/ # MIME 类型
+│   ├── image_optimizer/    # 图片压缩、缩放与格式转换
+│   └── aspect_ratio_calculator/ # 宽高比计算
 └── expense_storage.dart    # 账本旧导入路径的兼容出口
 ```
 

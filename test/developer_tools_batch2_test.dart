@@ -125,6 +125,26 @@ void main() {
       );
     });
 
+    test('generates a standard HMAC and validates its boundaries', () {
+      expect(
+        generateHmac(
+          'key',
+          'The quick brown fox jumps over the lazy dog',
+          HashAlgorithm.sha256,
+        ).digest,
+        'f7bc83f430538424b13298e6aa6fb143ef4d59a14946175997479dbc2d1a3cd8',
+      );
+      expect(
+        generateHmac('', 'message', HashAlgorithm.sha256).isSuccess,
+        isFalse,
+      );
+      expect(generateHmac('key', '', HashAlgorithm.sha256).isSuccess, isFalse);
+      expect(
+        generateHmac('key', 'message', HashAlgorithm.md5).isSuccess,
+        isFalse,
+      );
+    });
+
     test('validates expected digests without accepting partial values', () {
       const digest =
           'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad';
@@ -193,6 +213,49 @@ void main() {
 
       expect(find.text('example.zip'), findsOneWidget);
       expect(find.text('校验一致'), findsOneWidget);
+
+      await tester.enterText(
+        find.byKey(const Key('expectedDigest')),
+        '${digest}0',
+      );
+      await tester.pump();
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const Key('expectedDigest')))
+            .controller
+            ?.text,
+        '${digest}0',
+      );
+      expect(find.text('校验一致'), findsNothing);
+    });
+
+    testWidgets('HMAC mode hides the secret and renders a result', (
+      tester,
+    ) async {
+      await tester.pumpWidget(const MaterialApp(home: HashGeneratorScreen()));
+
+      await tester.tap(find.text('HMAC'));
+      await tester.pump();
+      await tester.enterText(find.byKey(const Key('hmacSecret')), 'key');
+      await tester.tap(find.byKey(const Key('generateHmac')));
+      await tester.pump();
+
+      final secret = tester.widget<TextField>(
+        find.byKey(const Key('hmacSecret')),
+      );
+      final output = tester.widget<TextField>(
+        find.byKey(const Key('hashOutput')),
+      );
+      expect(secret.obscureText, isTrue);
+      expect(output.controller?.text, hasLength(64));
+
+      final oversizedSecret = 'k' * (maxHmacKeyLength + 1);
+      await tester.enterText(find.byKey(const Key('hmacSecret')), oversizedSecret);
+      await tester.tap(find.byKey(const Key('generateHmac')));
+      await tester.pump();
+      expect(secret.controller?.text, oversizedSecret);
+      expect(output.controller?.text, isEmpty);
+      expect(find.textContaining('不能超过 4096'), findsOneWidget);
     });
   });
 

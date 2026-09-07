@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 
 const maxHashInputLength = 100000;
+const maxHmacKeyLength = 4096;
 
 enum HashAlgorithm { md5, sha1, sha256, sha512 }
 
@@ -55,5 +56,27 @@ HashToolResult generateTextHash(String input, HashAlgorithm algorithm) {
     HashAlgorithm.sha256 => sha256.convert(bytes),
     HashAlgorithm.sha512 => sha512.convert(bytes),
   };
+  return HashToolResult(digest: digest.toString());
+}
+
+/// 使用共享密钥生成消息认证码；密钥只参与本次内存计算，不持久化。
+HashToolResult generateHmac(
+  String key,
+  String message,
+  HashAlgorithm algorithm,
+) {
+  if (algorithm != HashAlgorithm.sha256 && algorithm != HashAlgorithm.sha512) {
+    return const HashToolResult(error: 'HMAC 仅支持 SHA-256 或 SHA-512');
+  }
+  if (key.isEmpty) return const HashToolResult(error: '请输入共享密钥');
+  if (key.length > maxHmacKeyLength) {
+    return const HashToolResult(error: '共享密钥不能超过 4096 个字符');
+  }
+  if (message.isEmpty) return const HashToolResult(error: '请输入消息内容');
+  if (message.length > maxHashInputLength) {
+    return const HashToolResult(error: '消息内容不能超过 100000 个字符');
+  }
+  final hash = algorithm == HashAlgorithm.sha256 ? sha256 : sha512;
+  final digest = Hmac(hash, utf8.encode(key)).convert(utf8.encode(message));
   return HashToolResult(digest: digest.toString());
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../app/models/tool_definition.dart';
 import 'age_calculator/age_calculator_screen.dart';
+import 'aspect_ratio_calculator/aspect_ratio_calculator_screen.dart';
 import 'base64_tool/base64_tool_screen.dart';
 import 'bmi_calculator/bmi_calculator_screen.dart';
 import 'bill_split/bill_split_screen.dart';
@@ -14,6 +15,7 @@ import 'date_calculator/date_calculator_screen.dart';
 import 'expense/expense_tool_screen.dart';
 import 'hash_generator/hash_generator_screen.dart';
 import 'http_status_reference/http_status_reference_screen.dart';
+import 'image_optimizer/image_optimizer_screen.dart';
 import 'ipv4_subnet/ipv4_subnet_screen.dart';
 import 'json_tool/json_tool_screen.dart';
 import 'jwt_viewer/jwt_viewer_screen.dart';
@@ -83,7 +85,7 @@ abstract final class ToolRegistry {
     ToolDefinition(
       id: 'text_tools',
       title: '文本工具',
-      description: '统计、转换与清理文本',
+      description: '统计、转换与 HTML 实体处理',
       category: ToolCategory.text,
       icon: Icons.text_fields_outlined,
       builder: _textTools,
@@ -227,7 +229,7 @@ abstract final class ToolRegistry {
     ToolDefinition(
       id: 'hash_generator',
       title: '哈希生成',
-      description: '生成文本摘要并校验文件完整性',
+      description: '文本、文件摘要与 HMAC',
       category: ToolCategory.security,
       icon: Icons.tag,
       builder: _hashGenerator,
@@ -320,6 +322,22 @@ abstract final class ToolRegistry {
       icon: Icons.description_outlined,
       builder: _mimeTypeReference,
     ),
+    ToolDefinition(
+      id: 'image_optimizer',
+      title: '图片优化',
+      description: '离线压缩、缩放与格式转换',
+      category: ToolCategory.productivity,
+      icon: Icons.photo_size_select_large_outlined,
+      builder: _imageOptimizer,
+    ),
+    ToolDefinition(
+      id: 'aspect_ratio_calculator',
+      title: '宽高比计算',
+      description: '约分比例并等比换算尺寸',
+      category: ToolCategory.calculation,
+      icon: Icons.aspect_ratio_outlined,
+      builder: _aspectRatioCalculator,
+    ),
   ];
 
   static Widget _expense(BuildContext context) => const ExpenseToolScreen();
@@ -378,4 +396,8 @@ abstract final class ToolRegistry {
       const HttpStatusReferenceScreen();
   static Widget _mimeTypeReference(BuildContext context) =>
       const MimeTypeReferenceScreen();
+  static Widget _imageOptimizer(BuildContext context) =>
+      const ImageOptimizerScreen();
+  static Widget _aspectRatioCalculator(BuildContext context) =>
+      const AspectRatioCalculatorScreen();
 }

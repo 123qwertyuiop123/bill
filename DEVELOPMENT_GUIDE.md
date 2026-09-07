@@ -269,5 +269,6 @@ flutter build apk --release --no-pub
 - `design/developer-tools-batch-2-v1.png`：正则、哈希、颜色对比度、JWT、CSV/JSON 和 Cron 工具的已确认设计。
 - `design/offline-tools-batch-3-v1.png`：占位文本、IPv4 子网计算、权限计算和 Luhn 校验的已确认设计；状态和边界见同目录 `offline-tools-batch-3-proposal.md`。
 - `design/offline-tools-batch-4-v1.png`：文件哈希校验、Markdown 预览、HTTP 状态码和 MIME 类型的已确认设计；去重与安全边界见同目录 `offline-tools-batch-4-proposal.md`。
+- `design/offline-tools-batch-5-v1.png`：图片优化、宽高比计算、HMAC 和 HTML 实体处理的已确认设计；内存、元数据与公开存储边界见同目录 `offline-tools-batch-5-proposal.md`。
 
 开发 UI 时应先对照这些设计，若设计之间冲突，以用户最后确认的版本为准。
