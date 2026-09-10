@@ -57,6 +57,14 @@ Current tools:
 | `mime_type_reference` | MIME 类型 | Query a bounded built-in extension-to-MIME table in either direction; never read or sniff files. |
 | `image_optimizer` | 图片优化 | Select one JPEG/PNG/WebP image through Android's system picker, enforce 20 MB and 24-megapixel limits, resize/compress it off the UI thread, remove metadata by re-encoding, and explicitly save a result to the public Pictures directory. Never upload images or move image bytes through Dart. |
 | `aspect_ratio_calculator` | 宽高比计算 | Reduce integer dimensions to a ratio and calculate bounded aspect-preserving target dimensions locally. |
+| `yaml_json_converter` | YAML/JSON 转换 | Convert bounded YAML and JSON documents locally with node, depth, input, and output limits; only JSON-compatible values and string mapping keys are accepted. |
+| `xml_tool` | XML 工具 | Format, minify, and validate bounded XML locally while rejecting DTD and entity declarations and enforcing node, depth, input, and output limits. |
+| `unicode_inspector` | Unicode 检查 | Inspect bounded text by Unicode scalar and show code points, UTF-8, UTF-16, and escape forms; it does not identify fonts, languages, or confusable characters. |
+| `port_reference` | 端口号参考 | Search a bounded built-in table of common TCP/UDP ports by number or service name; never scan networks, open sockets, or claim live port usage. |
+| `totp_generator` | TOTP 验证码 | Generate bounded RFC 6238 TOTP codes from a manually entered Base32 secret using SHA-1/SHA-256/SHA-512, 6/8 digits and 30/60-second periods; secrets and codes are transient and never persisted or logged. |
+| `ohms_law_calculator` | 欧姆定律 | Calculate voltage, current, resistance and power from any two positive bounded electrical quantities with common SI input units. |
+| `statistics_calculator` | 统计计算 | Parse up to 10,000 bounded finite numbers and calculate descriptive statistics including mean, median, range, and population/sample standard deviation. |
+| `roman_numeral_converter` | 罗马数字 | Strictly convert decimal integers from 1 to 3999 and canonical Roman numerals in both directions. |
 
 Duplicate decisions already established:
 
@@ -72,6 +80,14 @@ Candidate tools checked against the current inventory:
 - Now covered: file-hash verification extends `hash_generator`; Markdown preview, offline HTTP status reference and MIME type reference each use their dedicated workflow. Extend these modules instead of adding duplicates.
 - Now covered: image resize/compression belongs to `image_optimizer`; aspect-ratio reduction and dimension scaling belong to `aspect_ratio_calculator`. Extend these modules instead of adding duplicates.
 - Now covered: HMAC belongs to `hash_generator`, and HTML entity conversion belongs to `text_tools`; extend those modules instead of adding duplicates.
+- Now covered: YAML/JSON conversion, bounded XML processing, Unicode scalar inspection, and offline common-port lookup each use their dedicated modules. Extend these modules instead of adding duplicates.
+- Now covered: RFC 6238 TOTP generation, four-value Ohm's-law solving, bounded descriptive statistics, and canonical Roman numeral conversion each use their dedicated modules. Extend these modules instead of adding duplicates.
+- Do not add a separate OTP authenticator or TOTP screen under another name; account persistence, QR import, HOTP, and backup workflows require a separate security and UI review before extending `totp_generator`.
+- Do not add another mean, median, range, variance, or standard-deviation calculator; extend `statistics_calculator`.
+- Electrical formula solving belongs to `ohms_law_calculator`, while conversions between units of the same quantity belong to `unit_converter`.
+- Roman numerals belong to `roman_numeral_converter`; positional binary/octal/decimal/hexadecimal conversion remains in `number_base_converter`.
+- Do not add a separate ASCII table; ASCII inspection is a filter inside `unicode_inspector`.
+- JSONPath or other general JSON queries should extend `json_tool` instead of creating another JSON workbench.
 - Already covered: text case conversion, word/character/line counting, list sorting/deduplication/shuffling, text diff, QR generation, password generation, general unit conversion, and random selection.
 - Partially covered: advanced text-case formats should normally extend `text_tools`; additional physical units should extend `unit_converter`; random-string generation should be evaluated against `password_generator` before becoming separate.
 

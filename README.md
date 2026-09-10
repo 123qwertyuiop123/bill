@@ -1,6 +1,6 @@
 # ZM 工具箱
 
-一款简洁、本地优先的 Flutter 多功能工具 App。当前提供 37 个离线工具，并完整保留原有收支账本、分类统计、多 TXT 账本切换和 Android 公共目录自动同步功能。
+一款简洁、本地优先的 Flutter 多功能工具 App。当前提供 45 个离线工具，并完整保留原有收支账本、分类统计、多 TXT 账本切换和 Android 公共目录自动同步功能。
 
 ![工具箱界面设计](design/multitool-ui-overview-square.png)
 
@@ -43,6 +43,14 @@
 - 常见扩展名与 MIME 类型离线查询，不读取或嗅探文件
 - JPEG、PNG 和 WebP 图片离线压缩、缩放与格式转换，默认移除元数据，输出保存到 `Pictures/ZM工具箱`
 - 宽高比约分与等比尺寸换算
+- YAML 与 JSON 双向转换，限制输入、输出、节点数和嵌套深度
+- XML 格式化、压缩和校验，拒绝 DTD 与实体声明
+- Unicode 字符码点、UTF-8、UTF-16 和转义形式检查
+- 常用 TCP/UDP 端口号离线查询，不扫描网络
+- TOTP 动态验证码生成，密钥仅保留在当前页面
+- 欧姆定律任意两个已知量计算，支持常见 SI 单位
+- 数字列表的总和、均值、中位数、极差和标准差计算
+- 1–3999 十进制整数与规范罗马数字双向转换
 - 原有收支账本完整保留：
 - 记录收入和支出原因、金额、分类与日期
 - 按天查看、添加、修改和删除记录
@@ -168,7 +176,15 @@ lib/
 │   ├── http_status_reference/ # HTTP 状态码
 │   ├── mime_type_reference/ # MIME 类型
 │   ├── image_optimizer/    # 图片压缩、缩放与格式转换
-│   └── aspect_ratio_calculator/ # 宽高比计算
+│   ├── aspect_ratio_calculator/ # 宽高比计算
+│   ├── yaml_json_converter/ # YAML/JSON 转换
+│   ├── xml_tool/           # XML 格式化、压缩和校验
+│   ├── unicode_inspector/  # Unicode 编码检查
+│   ├── port_reference/     # 常用端口号离线参考
+│   ├── totp_generator/     # TOTP 动态验证码
+│   ├── ohms_law_calculator/ # 欧姆定律
+│   ├── statistics_calculator/ # 统计计算
+│   └── roman_numeral_converter/ # 罗马数字转换
 └── expense_storage.dart    # 账本旧导入路径的兼容出口
 ```
 

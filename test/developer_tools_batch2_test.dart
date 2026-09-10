@@ -250,7 +250,10 @@ void main() {
       expect(output.controller?.text, hasLength(64));
 
       final oversizedSecret = 'k' * (maxHmacKeyLength + 1);
-      await tester.enterText(find.byKey(const Key('hmacSecret')), oversizedSecret);
+      await tester.enterText(
+        find.byKey(const Key('hmacSecret')),
+        oversizedSecret,
+      );
       await tester.tap(find.byKey(const Key('generateHmac')));
       await tester.pump();
       expect(secret.controller?.text, oversizedSecret);

@@ -42,6 +42,9 @@ dependencies:
   qr_flutter: ^4.1.0
   # 官方纯 Dart 哈希实现；所有输入只在本机内存中处理。
   crypto: ^3.0.7
+  # 纯 Dart 数据格式解析；工具只处理有严格大小和深度上限的内存文本。
+  yaml: ^3.1.4
+  xml: ^7.0.1
 
 dev_dependencies:
   flutter_test:

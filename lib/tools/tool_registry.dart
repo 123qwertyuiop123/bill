@@ -24,20 +24,28 @@ import 'luhn_checker/luhn_checker_screen.dart';
 import 'markdown_preview/markdown_preview_screen.dart';
 import 'mime_type_reference/mime_type_reference_screen.dart';
 import 'number_base_converter/number_base_converter_screen.dart';
+import 'ohms_law_calculator/ohms_law_calculator_screen.dart';
 import 'password_generator/password_generator_screen.dart';
 import 'percentage_calculator/percentage_calculator_screen.dart';
 import 'placeholder_text/placeholder_text_screen.dart';
+import 'port_reference/port_reference_screen.dart';
 import 'qr_code/qr_code_screen.dart';
 import 'random_decision/random_decision_screen.dart';
 import 'regex_tester/regex_tester_screen.dart';
+import 'roman_numeral_converter/roman_numeral_converter_screen.dart';
+import 'statistics_calculator/statistics_calculator_screen.dart';
 import 'stopwatch_timer/stopwatch_timer_screen.dart';
 import 'tally_counter/tally_counter_screen.dart';
 import 'text_diff/text_diff_screen.dart';
 import 'text_tools/text_tools_screen.dart';
 import 'timestamp_converter/timestamp_converter_screen.dart';
+import 'totp_generator/totp_generator_screen.dart';
 import 'unit_converter/unit_converter_screen.dart';
+import 'unicode_inspector/unicode_inspector_screen.dart';
 import 'url_tool/url_tool_screen.dart';
 import 'uuid_generator/uuid_generator_screen.dart';
+import 'xml_tool/xml_tool_screen.dart';
+import 'yaml_json_converter/yaml_json_converter_screen.dart';
 
 /// 所有工具只在这里注册一次，首页、分类、收藏和搜索共享同一数据源。
 abstract final class ToolRegistry {
@@ -338,6 +346,70 @@ abstract final class ToolRegistry {
       icon: Icons.aspect_ratio_outlined,
       builder: _aspectRatioCalculator,
     ),
+    ToolDefinition(
+      id: 'yaml_json_converter',
+      title: 'YAML/JSON 转换',
+      description: '离线双向转换 YAML 与 JSON',
+      category: ToolCategory.text,
+      icon: Icons.swap_horiz_outlined,
+      builder: _yamlJsonConverter,
+    ),
+    ToolDefinition(
+      id: 'xml_tool',
+      title: 'XML 工具',
+      description: '安全格式化、压缩与校验 XML',
+      category: ToolCategory.text,
+      icon: Icons.code_outlined,
+      builder: _xmlTool,
+    ),
+    ToolDefinition(
+      id: 'unicode_inspector',
+      title: 'Unicode 检查',
+      description: '查看字符码点与 UTF 编码',
+      category: ToolCategory.text,
+      icon: Icons.translate_outlined,
+      builder: _unicodeInspector,
+    ),
+    ToolDefinition(
+      id: 'port_reference',
+      title: '端口号参考',
+      description: '离线查询常用 TCP/UDP 端口',
+      category: ToolCategory.productivity,
+      icon: Icons.dns_outlined,
+      builder: _portReference,
+    ),
+    ToolDefinition(
+      id: 'totp_generator',
+      title: 'TOTP 验证码',
+      description: '用 Base32 密钥离线生成动态验证码',
+      category: ToolCategory.security,
+      icon: Icons.verified_user_outlined,
+      builder: _totpGenerator,
+    ),
+    ToolDefinition(
+      id: 'ohms_law_calculator',
+      title: '欧姆定律',
+      description: '从两个电气量计算其余结果',
+      category: ToolCategory.calculation,
+      icon: Icons.electric_bolt_outlined,
+      builder: _ohmsLawCalculator,
+    ),
+    ToolDefinition(
+      id: 'statistics_calculator',
+      title: '统计计算',
+      description: '计算数值列表的描述统计',
+      category: ToolCategory.calculation,
+      icon: Icons.query_stats_outlined,
+      builder: _statisticsCalculator,
+    ),
+    ToolDefinition(
+      id: 'roman_numeral_converter',
+      title: '罗马数字',
+      description: '十进制整数与罗马数字互转',
+      category: ToolCategory.calculation,
+      icon: Icons.history_edu_outlined,
+      builder: _romanNumeralConverter,
+    ),
   ];
 
   static Widget _expense(BuildContext context) => const ExpenseToolScreen();
@@ -400,4 +472,19 @@ abstract final class ToolRegistry {
       const ImageOptimizerScreen();
   static Widget _aspectRatioCalculator(BuildContext context) =>
       const AspectRatioCalculatorScreen();
+  static Widget _yamlJsonConverter(BuildContext context) =>
+      const YamlJsonConverterScreen();
+  static Widget _xmlTool(BuildContext context) => const XmlToolScreen();
+  static Widget _unicodeInspector(BuildContext context) =>
+      const UnicodeInspectorScreen();
+  static Widget _portReference(BuildContext context) =>
+      const PortReferenceScreen();
+  static Widget _totpGenerator(BuildContext context) =>
+      const TotpGeneratorScreen();
+  static Widget _ohmsLawCalculator(BuildContext context) =>
+      const OhmsLawCalculatorScreen();
+  static Widget _statisticsCalculator(BuildContext context) =>
+      const StatisticsCalculatorScreen();
+  static Widget _romanNumeralConverter(BuildContext context) =>
+      const RomanNumeralConverterScreen();
 }
