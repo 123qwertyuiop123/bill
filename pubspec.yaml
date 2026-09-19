@@ -40,6 +40,8 @@ dependencies:
   path_provider: ^2.1.5
   # 纯本地绘制二维码，不申请相机或网络权限。
   qr_flutter: ^4.1.0
+  # 纯 Dart/Flutter 一维条码绘制；只生成，不启用相机扫描或联网。
+  barcode_widget: ^2.0.4
   # 官方纯 Dart 哈希实现；所有输入只在本机内存中处理。
   crypto: ^3.0.7
   # 纯 Dart 数据格式解析；工具只处理有严格大小和深度上限的内存文本。

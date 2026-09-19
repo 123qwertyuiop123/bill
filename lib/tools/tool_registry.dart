@@ -20,6 +20,7 @@ import 'ipv4_subnet/ipv4_subnet_screen.dart';
 import 'json_tool/json_tool_screen.dart';
 import 'jwt_viewer/jwt_viewer_screen.dart';
 import 'list_processor/list_processor_screen.dart';
+import 'loan_calculator/loan_calculator_screen.dart';
 import 'luhn_checker/luhn_checker_screen.dart';
 import 'markdown_preview/markdown_preview_screen.dart';
 import 'mime_type_reference/mime_type_reference_screen.dart';
@@ -46,6 +47,10 @@ import 'url_tool/url_tool_screen.dart';
 import 'uuid_generator/uuid_generator_screen.dart';
 import 'xml_tool/xml_tool_screen.dart';
 import 'yaml_json_converter/yaml_json_converter_screen.dart';
+import 'resistor_decoder/resistor_decoder_screen.dart';
+import 'quadratic_solver/quadratic_solver_screen.dart';
+import 'geometry_calculator/geometry_calculator_screen.dart';
+import 'matrix_calculator/matrix_calculator_screen.dart';
 
 /// 所有工具只在这里注册一次，首页、分类、收藏和搜索共享同一数据源。
 abstract final class ToolRegistry {
@@ -100,8 +105,8 @@ abstract final class ToolRegistry {
     ),
     ToolDefinition(
       id: 'qr_code',
-      title: '二维码',
-      description: '离线生成文字或网址二维码',
+      title: '二维码与条码',
+      description: '离线生成二维码和常用一维条码',
       category: ToolCategory.text,
       icon: Icons.qr_code_2_outlined,
       builder: _qrCode,
@@ -245,7 +250,7 @@ abstract final class ToolRegistry {
     ToolDefinition(
       id: 'color_contrast',
       title: '颜色与对比度',
-      description: '检查文字颜色的 WCAG 对比度',
+      description: '检查 WCAG 对比度与色觉模拟',
       category: ToolCategory.productivity,
       icon: Icons.contrast,
       builder: _colorContrast,
@@ -410,6 +415,46 @@ abstract final class ToolRegistry {
       icon: Icons.history_edu_outlined,
       builder: _romanNumeralConverter,
     ),
+    ToolDefinition(
+      id: 'resistor_decoder',
+      title: '电阻解码',
+      description: '解码色环与数字贴片阻值',
+      category: ToolCategory.calculation,
+      icon: Icons.memory_outlined,
+      builder: _resistorDecoder,
+    ),
+    ToolDefinition(
+      id: 'quadratic_solver',
+      title: '二次方程',
+      description: '求解实根、复根与退化方程',
+      category: ToolCategory.calculation,
+      icon: Icons.functions,
+      builder: _quadraticSolver,
+    ),
+    ToolDefinition(
+      id: 'geometry_calculator',
+      title: '几何计算',
+      description: '矩形、圆形与三角形面积周长',
+      category: ToolCategory.calculation,
+      icon: Icons.square_foot_outlined,
+      builder: _geometryCalculator,
+    ),
+    ToolDefinition(
+      id: 'matrix_calculator',
+      title: '矩阵计算',
+      description: '小型方阵行列式、转置与求逆',
+      category: ToolCategory.calculation,
+      icon: Icons.grid_on_outlined,
+      builder: _matrixCalculator,
+    ),
+    ToolDefinition(
+      id: 'loan_calculator',
+      title: '贷款计算',
+      description: '固定利率等额本息与还款计划',
+      category: ToolCategory.calculation,
+      icon: Icons.payments_outlined,
+      builder: _loanCalculator,
+    ),
   ];
 
   static Widget _expense(BuildContext context) => const ExpenseToolScreen();
@@ -487,4 +532,14 @@ abstract final class ToolRegistry {
       const StatisticsCalculatorScreen();
   static Widget _romanNumeralConverter(BuildContext context) =>
       const RomanNumeralConverterScreen();
+  static Widget _resistorDecoder(BuildContext context) =>
+      const ResistorDecoderScreen();
+  static Widget _quadraticSolver(BuildContext context) =>
+      const QuadraticSolverScreen();
+  static Widget _geometryCalculator(BuildContext context) =>
+      const GeometryCalculatorScreen();
+  static Widget _matrixCalculator(BuildContext context) =>
+      const MatrixCalculatorScreen();
+  static Widget _loanCalculator(BuildContext context) =>
+      const LoanCalculatorScreen();
 }

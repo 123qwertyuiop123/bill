@@ -7,7 +7,7 @@ Project invariants:
 - Preserve existing ledger data, TXT formatting, and Android public export behavior.
 - Keep every tool in its own `lib/tools/<tool_name>/` folder and register it once in `lib/tools/tool_registry.dart`.
 - Keep the main navigation limited to 首页、分类、收藏、设置.
-- Obtain user approval for new or materially changed UI before implementation.
+- Generate a design before implementing new or changed UI. When it follows the confirmed design system and does not materially change navigation, information architecture, core workflows, storage, permissions, network, or privacy boundaries, self-review it for consistency and usability and proceed without waiting for separate approval. Obtain user approval for material changes.
 - Prefer offline, low-permission, local processing; never embed API secrets in the app.
 - Add meaningful Chinese comments around business rules, compatibility, and security boundaries.
 - Run formatting, static analysis, tests, and relevant release builds in the order defined by `DEVELOPMENT_GUIDE.md`.
@@ -26,7 +26,7 @@ Current tools:
 | `date_calculator` | 日期计算 | Calculate the interval between dates and add or subtract days from a date. |
 | `password_generator` | 密码生成 | Generate offline passwords with a cryptographically secure random source and selectable character groups. |
 | `text_tools` | 文本工具 | Count characters, words, and lines; convert letter case; trim lines; remove blank lines; encode and strictly decode bounded HTML entities. General text transforms belong here when they do not need a separate workflow. |
-| `qr_code` | 二维码 | Generate a QR code locally from text or a URL. |
+| `qr_code` | 二维码与条码 | Generate QR codes plus bounded Code 128, EAN-13 and UPC-A barcodes locally; EAN/UPC check digits are validated or appended, and no scanner or camera permission is included. |
 | `bmi_calculator` | BMI 计算 | Calculate BMI from height and weight and show the corresponding range. |
 | `stopwatch_timer` | 秒表与倒计时 | Stopwatch, lap recording, and countdown timer. |
 | `percentage_calculator` | 百分比计算 | Calculate ratios, percentage increases/decreases, and discounts. |
@@ -44,7 +44,7 @@ Current tools:
 | `uuid_generator` | UUID 生成 | Generate bounded batches of UUID v4 values with the platform cryptographically secure random source; results remain in memory. |
 | `regex_tester` | 正则测试 | Test bounded regular expressions in a killable background isolate with timeout protection and bounded match output. |
 | `hash_generator` | 哈希生成 | Generate bounded UTF-8 text digests, SHA-256/SHA-512 HMAC values, or stream a user-selected Android file up to 512 MB through the system document picker for MD5/SHA verification; never upload, modify, log, or persist file content, keys, or paths. |
-| `color_contrast` | 颜色与对比度 | Parse bounded HEX colors and calculate WCAG contrast ratios and AA/AAA thresholds locally. |
+| `color_contrast` | 颜色与对比度 | Parse bounded HEX colors, calculate WCAG contrast ratios and AA/AAA thresholds, and preview three color-vision-deficiency transformations locally without making medical claims. |
 | `jwt_viewer` | JWT 查看 | Decode bounded JWT Header and Payload JSON locally, display expiry hints, and explicitly never claim signature validity. |
 | `csv_json_converter` | CSV/JSON 转换 | Convert bounded RFC-4180-style CSV tables and flat JSON object arrays locally with row, column, and output limits. |
 | `cron_parser` | Cron 解析 | Parse bounded standard five-field Cron expressions offline and calculate five future runs in the device local timezone. |
@@ -65,6 +65,11 @@ Current tools:
 | `ohms_law_calculator` | 欧姆定律 | Calculate voltage, current, resistance and power from any two positive bounded electrical quantities with common SI input units. |
 | `statistics_calculator` | 统计计算 | Parse up to 10,000 bounded finite numbers and calculate descriptive statistics including mean, median, range, and population/sample standard deviation. |
 | `roman_numeral_converter` | 罗马数字 | Strictly convert decimal integers from 1 to 3999 and canonical Roman numerals in both directions. |
+| `resistor_decoder` | 电阻解码 | Decode four/five resistor color bands with tolerance and range, or strict three/four ASCII digit SMD codes; never infer SMD tolerance or substitute for physical measurement. |
+| `quadratic_solver` | 二次方程 | Solve a fixed quadratic with bounded finite coefficients, real/complex roots, discriminant and linear/identity/no-solution fallbacks; never evaluate expressions. |
+| `geometry_calculator` | 几何计算 | Calculate rectangle, circle and three-side triangle area/perimeter with bounded positive lengths and stable triangle validation; no unit conversion or ratio reduction. |
+| `matrix_calculator` | 矩阵计算 | Calculate determinant, transpose and inverse for bounded 2×2/3×3 matrices, rejecting unreliable near-singular inverses; no higher-order matrices or matrix multiplication. |
+| `loan_calculator` | 贷款计算 | Estimate bounded fixed-rate equal-payment loans, totals and up to 600 monthly amortization rows locally; results exclude fees, changing rates and financial advice. |
 
 Duplicate decisions already established:
 
@@ -86,6 +91,10 @@ Candidate tools checked against the current inventory:
 - Do not add another mean, median, range, variance, or standard-deviation calculator; extend `statistics_calculator`.
 - Electrical formula solving belongs to `ohms_law_calculator`, while conversions between units of the same quantity belong to `unit_converter`.
 - Roman numerals belong to `roman_numeral_converter`; positional binary/octal/decimal/hexadecimal conversion remains in `number_base_converter`.
+- Now covered: resistor color-band and numeric SMD decoding, fixed quadratic solving, basic shape area/perimeter and small-matrix operations belong to their existing dedicated modules; extend them instead of adding duplicates.
+- EIA-96, six-band temperature coefficients, higher-order matrices, matrix multiplication and additional geometry workflows require a separate scope and UI review.
+- Now covered: color-vision preview extends `color_contrast`; Code 128, EAN-13 and UPC-A generation extends `qr_code`; fixed-rate equal-payment amortization belongs to `loan_calculator`. Extend these modules instead of adding duplicates.
+- Barcode scanning/camera workflows, floating-rate loans, regulatory APR, fees, taxes and personalized financial advice are outside the current reviewed scope.
 - Do not add a separate ASCII table; ASCII inspection is a filter inside `unicode_inspector`.
 - JSONPath or other general JSON queries should extend `json_tool` instead of creating another JSON workbench.
 - Already covered: text case conversion, word/character/line counting, list sorting/deduplication/shuffling, text diff, QR generation, password generation, general unit conversion, and random selection.
