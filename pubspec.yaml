@@ -47,6 +47,8 @@ dependencies:
   # 纯 Dart 数据格式解析；工具只处理有严格大小和深度上限的内存文本。
   yaml: ^3.1.4
   xml: ^7.0.1
+  # Dart 团队维护的 IANA 时区数据库；仅加载内置数据，不进行网络请求。
+  timezone: ^0.11.1
 
 dev_dependencies:
   flutter_test:

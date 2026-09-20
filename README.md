@@ -11,7 +11,7 @@
 - 基础计算器（不执行输入代码）
 - 长度、重量和温度单位换算
 - 日期间隔和日期推算
-- 使用安全随机数的本地密码生成器
+- 使用安全随机数的本地密码生成器与离线强度评估
 - 文本字数统计、大小写转换、空行清理和 HTML 实体编解码
 - 纯本地二维码及 Code 128、EAN-13、UPC-A 一维条码生成
 - BMI 计算
@@ -25,9 +25,9 @@
 - JSON 格式化、压缩和校验
 - Base64 UTF-8 文本编码与解码
 - URL 组件编码、解码和查询参数解析
-- Unix 秒/毫秒时间戳与本地日期互转
+- Unix 秒/毫秒时间戳、本地日期与世界时区换算
 - 二、八、十、十六进制任意精度整数转换
-- 使用安全随机源的 UUID v4 批量生成
+- 使用安全随机源的 UUID v4 / v7 批量生成
 - 带超时隔离保护的正则表达式测试
 - MD5、SHA-1、SHA-256 和 SHA-512 文本哈希，SHA-256/SHA-512 HMAC，以及 Android 系统文件选择器提供的只读文件完整性校验（最大 512 MB）
 - WCAG 颜色对比度与 AA/AAA 检查，以及红、绿、蓝三类色觉模拟预览
@@ -135,7 +135,7 @@ Android 10 及以上通过 MediaStore 写入公共下载目录，不申请“所
 - 当前版本：`1.0.0+1`
 - 工具内容仅在本机处理，不上传服务器
 - 工具箱只持久化收藏和最近使用的工具编号
-- 密码生成使用安全随机数，结果不写入文件
+- 密码生成使用安全随机数；强度评估仅检查本地弱模式，密码和结果不写入文件
 - 二维码和一维条码只在本地绘制，不申请相机、相册或联网权限
 
 主要目录（每个工具均为独立模块）：
@@ -149,7 +149,7 @@ lib/
 │   ├── calculator/         # 计算器
 │   ├── unit_converter/     # 单位换算
 │   ├── date_calculator/    # 日期计算
-│   ├── password_generator/ # 密码生成
+│   ├── password_generator/ # 密码生成与强度评估
 │   ├── text_tools/         # 文本工具
 │   ├── qr_code/            # 二维码与一维条码
 │   ├── bmi_calculator/     # BMI
@@ -164,9 +164,9 @@ lib/
 │   ├── json_tool/          # JSON 工具
 │   ├── base64_tool/        # Base64
 │   ├── url_tool/           # URL 编解码与参数解析
-│   ├── timestamp_converter/ # Unix 时间戳
+│   ├── timestamp_converter/ # Unix 时间戳与世界时区换算
 │   ├── number_base_converter/ # 进制转换
-│   ├── uuid_generator/     # UUID v4 生成
+│   ├── uuid_generator/     # UUID v4 / v7 生成
 │   ├── regex_tester/       # 正则测试
 │   ├── hash_generator/     # 文本/文件哈希与 HMAC
 │   ├── color_contrast/     # 颜色与对比度

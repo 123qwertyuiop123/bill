@@ -24,7 +24,7 @@ Current tools:
 | `calculator` | 计算器 | Safe basic addition, subtraction, multiplication, and division without evaluating code. |
 | `unit_converter` | 单位换算 | Convert length, weight, and temperature units. Extend this tool instead of creating another general unit converter. |
 | `date_calculator` | 日期计算 | Calculate the interval between dates and add or subtract days from a date. |
-| `password_generator` | 密码生成 | Generate offline passwords with a cryptographically secure random source and selectable character groups. |
+| `password_generator` | 密码生成 | Generate offline passwords with a cryptographically secure random source and selectable character groups; conservatively assess bounded passwords for common, repeated, and sequential weak patterns without persistence or upload. |
 | `text_tools` | 文本工具 | Count characters, words, and lines; convert letter case; trim lines; remove blank lines; encode and strictly decode bounded HTML entities. General text transforms belong here when they do not need a separate workflow. |
 | `qr_code` | 二维码与条码 | Generate QR codes plus bounded Code 128, EAN-13 and UPC-A barcodes locally; EAN/UPC check digits are validated or appended, and no scanner or camera permission is included. |
 | `bmi_calculator` | BMI 计算 | Calculate BMI from height and weight and show the corresponding range. |
@@ -39,9 +39,9 @@ Current tools:
 | `json_tool` | JSON工具 | Format, minify, and validate JSON locally with bounded input size and safe parse errors. |
 | `base64_tool` | Base64 | Encode and decode bounded UTF-8 text locally; it does not treat input as a file or executable content. |
 | `url_tool` | URL 编解码 | Encode and decode URI components and parse repeated query parameters locally without opening or requesting URLs. |
-| `timestamp_converter` | Unix 时间戳 | Convert bounded Unix seconds or milliseconds to local dates and convert supported local dates back to timestamps. |
+| `timestamp_converter` | Unix 时间戳 | Convert bounded Unix seconds or milliseconds to local dates, convert supported local dates back to timestamps, and translate wall-clock times among a built-in bounded list of IANA zones offline. |
 | `number_base_converter` | 进制转换 | Convert signed arbitrary-precision integers among binary, octal, decimal, and hexadecimal with bounded input. |
-| `uuid_generator` | UUID 生成 | Generate bounded batches of UUID v4 values with the platform cryptographically secure random source; results remain in memory. |
+| `uuid_generator` | UUID 生成 | Generate bounded batches of UUID v4 or RFC 9562 UUID v7 values with the platform cryptographically secure random source; results remain in memory and v7 is never presented as a secret token. |
 | `regex_tester` | 正则测试 | Test bounded regular expressions in a killable background isolate with timeout protection and bounded match output. |
 | `hash_generator` | 哈希生成 | Generate bounded UTF-8 text digests, SHA-256/SHA-512 HMAC values, or stream a user-selected Android file up to 512 MB through the system document picker for MD5/SHA verification; never upload, modify, log, or persist file content, keys, or paths. |
 | `color_contrast` | 颜色与对比度 | Parse bounded HEX colors, calculate WCAG contrast ratios and AA/AAA thresholds, and preview three color-vision-deficiency transformations locally without making medical claims. |
@@ -94,6 +94,7 @@ Candidate tools checked against the current inventory:
 - Now covered: resistor color-band and numeric SMD decoding, fixed quadratic solving, basic shape area/perimeter and small-matrix operations belong to their existing dedicated modules; extend them instead of adding duplicates.
 - EIA-96, six-band temperature coefficients, higher-order matrices, matrix multiplication and additional geometry workflows require a separate scope and UI review.
 - Now covered: color-vision preview extends `color_contrast`; Code 128, EAN-13 and UPC-A generation extends `qr_code`; fixed-rate equal-payment amortization belongs to `loan_calculator`. Extend these modules instead of adding duplicates.
+- Now covered: bounded local password-strength hints extend `password_generator`; IANA world-time conversion extends `timestamp_converter`; UUID v7 extends `uuid_generator`. Extend these modules instead of adding duplicate entries.
 - Barcode scanning/camera workflows, floating-rate loans, regulatory APR, fees, taxes and personalized financial advice are outside the current reviewed scope.
 - Do not add a separate ASCII table; ASCII inspection is a filter inside `unicode_inspector`.
 - JSONPath or other general JSON queries should extend `json_tool` instead of creating another JSON workbench.

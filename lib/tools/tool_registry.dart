@@ -90,7 +90,7 @@ abstract final class ToolRegistry {
     ToolDefinition(
       id: 'password_generator',
       title: '密码生成',
-      description: '使用安全随机数离线生成',
+      description: '安全生成密码并本地评估强度',
       category: ToolCategory.security,
       icon: Icons.password_outlined,
       builder: _passwordGenerator,
@@ -210,7 +210,7 @@ abstract final class ToolRegistry {
     ToolDefinition(
       id: 'timestamp_converter',
       title: 'Unix 时间戳',
-      description: '时间戳与本地日期互相转换',
+      description: '时间戳、日期与世界时区换算',
       category: ToolCategory.calculation,
       icon: Icons.access_time,
       builder: _timestampConverter,
@@ -226,7 +226,7 @@ abstract final class ToolRegistry {
     ToolDefinition(
       id: 'uuid_generator',
       title: 'UUID 生成',
-      description: '安全随机生成 UUID v4',
+      description: '安全生成 UUID v4 与 v7',
       category: ToolCategory.security,
       icon: Icons.fingerprint,
       builder: _uuidGenerator,
