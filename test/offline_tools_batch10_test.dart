@@ -58,6 +58,20 @@ void main() {
       expect(find.byKey(const Key('passwordStrengthResult')), findsOneWidget);
       expect(find.textContaining('检测到常见密码模式'), findsOneWidget);
     });
+
+    testWidgets('超长密码保留原文并由逻辑层拒绝', (tester) async {
+      await tester.pumpWidget(_app(const PasswordGeneratorScreen()));
+      await tester.tap(find.text('强度评估'));
+      await tester.pump();
+      final input = find.byKey(const Key('passwordEvaluationInput'));
+      final oversized = 'x' * (maxPasswordEvaluationLength + 1);
+
+      await tester.enterText(input, oversized);
+      expect(tester.widget<TextField>(input).controller!.text, oversized);
+      await tester.tap(find.byKey(const Key('evaluatePassword')));
+      await tester.pump();
+      expect(find.text('密码最多 256 个字符'), findsOneWidget);
+    });
   });
 
   group('世界时区换算', () {
@@ -80,16 +94,43 @@ void main() {
       final missing = convertTimeZone(
         dateTime: DateTime(2026, 3, 8, 2, 30),
         sourceZoneId: 'America/New_York',
-        targetZoneId: 'UTC',
+        targetZoneId: 'Asia/Shanghai',
+      );
+      final ambiguous = convertTimeZone(
+        dateTime: DateTime(2026, 11, 1, 1, 30),
+        sourceZoneId: 'America/New_York',
+        targetZoneId: 'Asia/Shanghai',
       );
       final unknown = convertTimeZone(
         dateTime: DateTime(2026),
         sourceZoneId: 'Invalid/Zone',
-        targetZoneId: 'UTC',
+        targetZoneId: 'Asia/Shanghai',
       );
 
       expect(missing.isSuccess, isFalse);
+      expect(missing.error, contains('不存在'));
+      expect(ambiguous.isSuccess, isFalse);
+      expect(ambiguous.error, contains('重复'));
       expect(unknown.isSuccess, isFalse);
+    });
+
+    test('UTC 可以作为源时区或目标时区', () {
+      final toUtc = convertTimeZone(
+        dateTime: DateTime(2026, 9, 20, 9),
+        sourceZoneId: 'Asia/Shanghai',
+        targetZoneId: 'UTC',
+      );
+      final fromUtc = convertTimeZone(
+        dateTime: DateTime(2026, 9, 20, 1),
+        sourceZoneId: 'UTC',
+        targetZoneId: 'Asia/Shanghai',
+      );
+
+      expect(toUtc.isSuccess, isTrue);
+      expect(toUtc.target!.hour, 1);
+      expect(formatUtcOffset(toUtc.target!.timeZoneOffset), 'UTC+00:00');
+      expect(fromUtc.isSuccess, isTrue);
+      expect(fromUtc.target!.hour, 9);
     });
 
     testWidgets('时区页签生成离线换算结果', (tester) async {

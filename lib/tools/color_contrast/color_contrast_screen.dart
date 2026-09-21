@@ -5,7 +5,7 @@ import '../../app/widgets/tool_widgets.dart';
 import '../../core/app_theme.dart';
 import 'color_contrast_logic.dart';
 
-enum _ColorMode { contrast, simulation }
+enum _ColorMode { contrast, conversion, simulation }
 
 /// 颜色检查完全在内存中完成；色觉模拟只用于无障碍设计预览。
 class ColorContrastScreen extends StatefulWidget {
@@ -18,30 +18,41 @@ class ColorContrastScreen extends StatefulWidget {
 class _ColorContrastScreenState extends State<ColorContrastScreen> {
   final foregroundController = TextEditingController(text: '#1F2937');
   final backgroundController = TextEditingController(text: '#FFFFFF');
+  final formatInputController = TextEditingController(text: '#197A4A');
   _ColorMode mode = _ColorMode.contrast;
+  ColorInputFormat inputFormat = ColorInputFormat.hex;
   ColorVisionType visionType = ColorVisionType.deuteranopia;
   ColorContrastResult? contrastResult;
+  ColorFormatConversionResult? conversionResult;
   ColorVisionSimulationResult? simulationResult;
 
   @override
   void dispose() {
     foregroundController.dispose();
     backgroundController.dispose();
+    formatInputController.dispose();
     super.dispose();
   }
 
   void _invalidate() => setState(() {
     contrastResult = null;
+    conversionResult = null;
     simulationResult = null;
   });
 
   void _run() => setState(() {
     contrastResult = null;
+    conversionResult = null;
     simulationResult = null;
     if (mode == _ColorMode.contrast) {
       contrastResult = checkColorContrast(
         foregroundController.text,
         backgroundController.text,
+      );
+    } else if (mode == _ColorMode.conversion) {
+      conversionResult = convertColorFormat(
+        formatInputController.text,
+        inputFormat,
       );
     } else {
       simulationResult = simulateColorVision(
@@ -59,45 +70,82 @@ class _ColorContrastScreenState extends State<ColorContrastScreen> {
         const Color(0xff1f2937);
     final background =
         parseHexColor(backgroundController.text)?.color ?? Colors.white;
-    final error = contrastResult?.error ?? simulationResult?.error;
+    final error =
+        contrastResult?.error ??
+        conversionResult?.error ??
+        simulationResult?.error;
     return ToolPageScaffold(
       title: '颜色与对比度',
       child: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          SegmentedButton<_ColorMode>(
-            segments: const [
-              ButtonSegment(value: _ColorMode.contrast, label: Text('对比度')),
-              ButtonSegment(value: _ColorMode.simulation, label: Text('色觉模拟')),
-            ],
-            selected: {mode},
-            showSelectedIcon: false,
-            onSelectionChanged: (selection) => setState(() {
-              mode = selection.first;
-              contrastResult = null;
-              simulationResult = null;
-            }),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: SegmentedButton<_ColorMode>(
+              segments: const [
+                ButtonSegment(value: _ColorMode.contrast, label: Text('对比度')),
+                ButtonSegment(
+                  value: _ColorMode.conversion,
+                  label: Text('格式转换'),
+                ),
+                ButtonSegment(
+                  value: _ColorMode.simulation,
+                  label: Text('色觉模拟'),
+                ),
+              ],
+              selected: {mode},
+              showSelectedIcon: false,
+              onSelectionChanged: (selection) => setState(() {
+                mode = selection.first;
+                contrastResult = null;
+                conversionResult = null;
+                simulationResult = null;
+              }),
+            ),
           ),
           const SizedBox(height: 16),
-          _ColorInput(
-            label: '前景色',
-            fieldKey: const Key('foregroundColorInput'),
-            controller: foregroundController,
-            color: foreground,
-            onChanged: _invalidate,
-          ),
-          const SizedBox(height: 12),
-          _ColorInput(
-            label: '背景色',
-            fieldKey: const Key('backgroundColorInput'),
-            controller: backgroundController,
-            color: background,
-            onChanged: _invalidate,
-          ),
+          if (mode == _ColorMode.conversion)
+            _ColorFormatInput(
+              controller: formatInputController,
+              format: inputFormat,
+              previewColor:
+                  conversionResult?.color?.color ??
+                  convertColorFormat(
+                    formatInputController.text,
+                    inputFormat,
+                  ).color?.color ??
+                  const Color(0xff197a4a),
+              onFormatChanged: (value) {
+                if (value == null) return;
+                setState(() {
+                  inputFormat = value;
+                  formatInputController.text = value.example;
+                  conversionResult = null;
+                });
+              },
+              onChanged: _invalidate,
+            )
+          else ...[
+            _ColorInput(
+              label: '前景色',
+              fieldKey: const Key('foregroundColorInput'),
+              controller: foregroundController,
+              color: foreground,
+              onChanged: _invalidate,
+            ),
+            const SizedBox(height: 12),
+            _ColorInput(
+              label: '背景色',
+              fieldKey: const Key('backgroundColorInput'),
+              controller: backgroundController,
+              color: background,
+              onChanged: _invalidate,
+            ),
+          ],
           const SizedBox(height: 16),
           if (mode == _ColorMode.contrast)
             _TextPreview(foreground: foreground, background: background)
-          else ...[
+          else if (mode == _ColorMode.simulation) ...[
             DropdownButtonFormField<ColorVisionType>(
               key: const Key('visionType'),
               initialValue: visionType,
@@ -175,23 +223,149 @@ class _ColorContrastScreenState extends State<ColorContrastScreen> {
               background: simulationResult!.simulatedBackground!.color,
             ),
           ],
+          if (conversionResult?.isSuccess ?? false) ...[
+            const SizedBox(height: 16),
+            _ColorFormatResult(result: conversionResult!),
+          ],
           const SizedBox(height: 16),
           FilledButton(
             key: const Key('runColorCheck'),
             onPressed: _run,
-            child: Text(mode == _ColorMode.contrast ? '检查对比度' : '开始模拟'),
+            child: Text(switch (mode) {
+              _ColorMode.contrast => '检查对比度',
+              _ColorMode.conversion => '转换格式',
+              _ColorMode.simulation => '开始模拟',
+            }),
           ),
           const SizedBox(height: 8),
-          Text(
-            mode == _ColorMode.contrast
-                ? '结果依据 WCAG 对比度阈值，仅在本机计算。'
-                : '色觉模拟仅作无障碍设计预览，不代表医学诊断。',
-            style: const TextStyle(color: AppColors.muted),
-          ),
+          Text(switch (mode) {
+            _ColorMode.contrast => '结果依据 WCAG 对比度阈值，仅在本机计算。',
+            _ColorMode.conversion => '颜色转换仅在本机完成，不读取图片或保存输入。',
+            _ColorMode.simulation => '色觉模拟仅作无障碍设计预览，不代表医学诊断。',
+          }, style: const TextStyle(color: AppColors.muted)),
         ],
       ),
     );
   }
+}
+
+class _ColorFormatInput extends StatelessWidget {
+  const _ColorFormatInput({
+    required this.controller,
+    required this.format,
+    required this.previewColor,
+    required this.onFormatChanged,
+    required this.onChanged,
+  });
+
+  final TextEditingController controller;
+  final ColorInputFormat format;
+  final Color previewColor;
+  final ValueChanged<ColorInputFormat?> onFormatChanged;
+  final VoidCallback onChanged;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    margin: EdgeInsets.zero,
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          DropdownButtonFormField<ColorInputFormat>(
+            key: const Key('colorInputFormat'),
+            initialValue: format,
+            decoration: const InputDecoration(labelText: '输入格式'),
+            items: ColorInputFormat.values
+                .map(
+                  (item) =>
+                      DropdownMenuItem(value: item, child: Text(item.label)),
+                )
+                .toList(),
+            onChanged: onFormatChanged,
+          ),
+          const SizedBox(height: 12),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: TextField(
+                  key: const Key('colorFormatInput'),
+                  controller: controller,
+                  maxLength: maxColorFormatInputLength,
+                  maxLengthEnforcement: MaxLengthEnforcement.none,
+                  decoration: InputDecoration(
+                    labelText: '${format.label} 输入',
+                    hintText: format.example,
+                    counterText: '',
+                  ),
+                  onChanged: (_) => onChanged(),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: previewColor,
+                  border: Border.all(color: AppColors.line),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _ColorFormatResult extends StatelessWidget {
+  const _ColorFormatResult({required this.result});
+
+  final ColorFormatConversionResult result;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('转换结果', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 8),
+          _CopyableColorRow(label: 'HEX', value: result.hex!),
+          _CopyableColorRow(label: 'RGB', value: result.rgb!),
+          _CopyableColorRow(label: 'HSL', value: result.hsl!),
+          _CopyableColorRow(label: 'HSV', value: result.hsv!),
+        ],
+      ),
+    ),
+  );
+}
+
+class _CopyableColorRow extends StatelessWidget {
+  const _CopyableColorRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) => ListTile(
+    contentPadding: EdgeInsets.zero,
+    title: Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
+    subtitle: SelectableText(value),
+    trailing: IconButton(
+      tooltip: '复制$label',
+      onPressed: () async {
+        await Clipboard.setData(ClipboardData(text: value));
+        if (context.mounted) {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text('已复制 $label')));
+        }
+      },
+      icon: const Icon(Icons.copy_outlined),
+    ),
+  );
 }
 
 class _ColorInput extends StatelessWidget {

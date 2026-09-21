@@ -125,28 +125,20 @@ TimeZoneConversionResult convertTimeZone({
   _initializeTimeZones();
 
   try {
-    final sourceLocation = tz.getLocation(sourceZoneId);
-    final targetLocation = tz.getLocation(targetZoneId);
-    final source = tz.TZDateTime(
-      sourceLocation,
-      dateTime.year,
-      dateTime.month,
-      dateTime.day,
-      dateTime.hour,
-      dateTime.minute,
-      dateTime.second,
-    );
-
-    // 夏令时向前跳变时，库会把不存在的本地时间自动归一化；这里显式拒绝，
-    // 防止用户误以为输入的墙上时间真实存在。
-    if (source.year != dateTime.year ||
-        source.month != dateTime.month ||
-        source.day != dateTime.day ||
-        source.hour != dateTime.hour ||
-        source.minute != dateTime.minute ||
-        source.second != dateTime.second) {
+    final sourceLocation = _locationForId(sourceZoneId);
+    final targetLocation = _locationForId(targetZoneId);
+    final matchingInstants = _matchingUtcInstants(sourceLocation, dateTime);
+    // 夏令时跳变可能让一个墙上时间对应零个或两个真实时刻；两种情况都不能静默猜测。
+    if (matchingInstants.isEmpty) {
       return const TimeZoneConversionResult(error: '源时区中不存在这个本地时间，请避开夏令时跳变时段');
     }
+    if (matchingInstants.length > 1) {
+      return const TimeZoneConversionResult(error: '源时区中这个本地时间重复出现，请避开夏令时回拨时段');
+    }
+    final source = tz.TZDateTime.fromMicrosecondsSinceEpoch(
+      sourceLocation,
+      matchingInstants.single,
+    );
 
     final target = tz.TZDateTime.from(source, targetLocation);
     final before = source.subtract(const Duration(hours: 2));
@@ -167,6 +159,49 @@ TimeZoneConversionResult convertTimeZone({
   } on RangeError {
     return const TimeZoneConversionResult(error: '日期超出时区数据库支持范围');
   }
+}
+
+tz.Location _locationForId(String id) =>
+    id == 'UTC' ? tz.UTC : tz.getLocation(id);
+
+List<int> _matchingUtcInstants(tz.Location location, DateTime wallTime) {
+  final wallMicroseconds = DateTime.utc(
+    wallTime.year,
+    wallTime.month,
+    wallTime.day,
+    wallTime.hour,
+    wallTime.minute,
+    wallTime.second,
+    wallTime.millisecond,
+    wallTime.microsecond,
+  ).microsecondsSinceEpoch;
+  final offsets = <int>{
+    Duration.zero.inMicroseconds,
+    for (final zone in location.zones) zone.offset.inMicroseconds,
+  };
+  final matches = <int>{};
+  for (final offset in offsets) {
+    final instant = wallMicroseconds - offset;
+    if (location
+            .timeZone(instant ~/ Duration.microsecondsPerMillisecond)
+            .offset
+            .inMicroseconds !=
+        offset) {
+      continue;
+    }
+    final local = tz.TZDateTime.fromMicrosecondsSinceEpoch(location, instant);
+    if (local.year == wallTime.year &&
+        local.month == wallTime.month &&
+        local.day == wallTime.day &&
+        local.hour == wallTime.hour &&
+        local.minute == wallTime.minute &&
+        local.second == wallTime.second &&
+        local.millisecond == wallTime.millisecond &&
+        local.microsecond == wallTime.microsecond) {
+      matches.add(instant);
+    }
+  }
+  return matches.toList(growable: false)..sort();
 }
 
 void _initializeTimeZones() {

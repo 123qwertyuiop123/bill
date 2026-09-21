@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../app/widgets/tool_widgets.dart';
+import '../../core/app_theme.dart';
+import 'unit_converter_logic.dart';
 
 class UnitConverterScreen extends StatefulWidget {
   const UnitConverterScreen({super.key});
@@ -15,22 +17,7 @@ class _UnitConverterScreenState extends State<UnitConverterScreen> {
   String kind = '长度';
   String from = '米';
   String to = '千米';
-
-  static const units = <String, List<String>>{
-    '长度': ['毫米', '厘米', '米', '千米'],
-    '重量': ['克', '千克', '吨'],
-    '温度': ['摄氏度', '华氏度', '开尔文'],
-  };
-
-  static const factors = <String, double>{
-    '毫米': .001,
-    '厘米': .01,
-    '米': 1,
-    '千米': 1000,
-    '克': .001,
-    '千克': 1,
-    '吨': 1000,
-  };
+  UnitConversionResult? result;
 
   @override
   void dispose() {
@@ -38,30 +25,34 @@ class _UnitConverterScreenState extends State<UnitConverterScreen> {
     super.dispose();
   }
 
-  double? get result {
-    final value = double.tryParse(inputController.text);
-    if (value == null) return null;
-    if (kind != '温度') return value * factors[from]! / factors[to]!;
-    final celsius = switch (from) {
-      '华氏度' => (value - 32) * 5 / 9,
-      '开尔文' => value - 273.15,
-      _ => value,
-    };
-    return switch (to) {
-      '华氏度' => celsius * 9 / 5 + 32,
-      '开尔文' => celsius + 273.15,
-      _ => celsius,
-    };
-  }
+  void _invalidate() => setState(() => result = null);
 
   void _changeKind(String? value) {
     if (value == null) return;
+    final pair = defaultUnitPairs[value]!;
     setState(() {
       kind = value;
-      from = units[value]!.first;
-      to = units[value]![1];
+      from = pair.$1;
+      to = pair.$2;
+      result = null;
     });
   }
+
+  void _convert() => setState(() {
+    result = convertUnit(
+      input: inputController.text,
+      kind: kind,
+      from: from,
+      to: to,
+    );
+  });
+
+  void _swapUnits() => setState(() {
+    final old = from;
+    from = to;
+    to = old;
+    result = null;
+  });
 
   @override
   Widget build(BuildContext context) => ToolPageScaffold(
@@ -72,72 +63,117 @@ class _UnitConverterScreenState extends State<UnitConverterScreen> {
         DropdownButtonFormField<String>(
           initialValue: kind,
           decoration: const InputDecoration(labelText: '换算类型'),
-          items: units.keys
+          items: conversionUnits.keys
               .map((item) => DropdownMenuItem(value: item, child: Text(item)))
               .toList(),
           onChanged: _changeKind,
         ),
         const SizedBox(height: 16),
         TextField(
+          key: const Key('unitValueInput'),
           controller: inputController,
-          onChanged: (_) => setState(() {}),
+          maxLength: maxUnitInputLength,
+          // 数值文本必须原样进入逻辑层；过滤字符或截断会把无效输入变成另一个数值。
+          maxLengthEnforcement: MaxLengthEnforcement.none,
+          onChanged: (_) => _invalidate(),
           keyboardType: const TextInputType.numberWithOptions(
             decimal: true,
             signed: true,
           ),
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(RegExp(r'[-0-9.]')),
-          ],
-          decoration: const InputDecoration(labelText: '数值'),
+          decoration: const InputDecoration(labelText: '数值', counterText: ''),
         ),
         const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _unitField(
-                '从',
-                from,
-                (value) => setState(() => from = value!),
-              ),
-            ),
-            IconButton(
-              tooltip: '交换单位',
-              onPressed: () => setState(() {
-                final old = from;
-                from = to;
-                to = old;
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final fromField = _unitField(
+              '从',
+              from,
+              (value) => setState(() {
+                if (value != null) from = value;
+                result = null;
               }),
-              icon: const Icon(Icons.swap_horiz),
-            ),
-            Expanded(
-              child: _unitField(
-                '到',
-                to,
-                (value) => setState(() => to = value!),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 28),
-        Card(
-          elevation: 0,
-          child: Padding(
-            padding: const EdgeInsets.all(22),
-            child: Column(
-              children: [
-                const Text('换算结果'),
-                const SizedBox(height: 8),
-                SelectableText(
-                  result == null ? '—' : '${_format(result!)} $to',
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w700,
+            );
+            final toField = _unitField(
+              '到',
+              to,
+              (value) => setState(() {
+                if (value != null) to = value;
+                result = null;
+              }),
+            );
+            if (constraints.maxWidth < 480) {
+              return Column(
+                children: [
+                  fromField,
+                  IconButton(
+                    tooltip: '交换单位',
+                    onPressed: _swapUnits,
+                    icon: const Icon(Icons.swap_vert),
                   ),
+                  toField,
+                ],
+              );
+            }
+            return Row(
+              children: [
+                Expanded(child: fromField),
+                IconButton(
+                  tooltip: '交换单位',
+                  onPressed: _swapUnits,
+                  icon: const Icon(Icons.swap_horiz),
                 ),
+                Expanded(child: toField),
               ],
+            );
+          },
+        ),
+        const SizedBox(height: 16),
+        FilledButton(
+          key: const Key('convertUnit'),
+          onPressed: _convert,
+          child: const Text('开始换算'),
+        ),
+        if (result?.error != null) ...[
+          const SizedBox(height: 12),
+          Text(result!.error!, style: const TextStyle(color: AppColors.danger)),
+        ],
+        if (result?.isSuccess ?? false) ...[
+          const SizedBox(height: 16),
+          Card(
+            elevation: 0,
+            child: Padding(
+              padding: const EdgeInsets.all(22),
+              child: Column(
+                children: [
+                  const Text('换算结果'),
+                  const SizedBox(height: 8),
+                  SelectableText(
+                    '${formatUnitValue(result!.value!)} ${unitSymbol(to)}',
+                    key: const Key('unitConversionResult'),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  if (kind == '数据容量') ...[
+                    const SizedBox(height: 16),
+                    const Text('1 GB = 1,000,000,000 字节'),
+                    const SizedBox(height: 4),
+                    const Text('1 GiB = 1,073,741,824 字节'),
+                  ],
+                ],
+              ),
             ),
           ),
-        ),
+        ],
+        if (kind == '数据容量') ...[
+          const SizedBox(height: 12),
+          const Text(
+            'KB/MB/GB/TB 使用十进制，KiB/MiB/GiB/TiB 使用二进制；不会读取文件。',
+            style: TextStyle(color: AppColors.muted),
+          ),
+        ],
       ],
     ),
   );
@@ -148,13 +184,11 @@ class _UnitConverterScreenState extends State<UnitConverterScreen> {
     ValueChanged<String?> changed,
   ) => DropdownButtonFormField<String>(
     initialValue: value,
+    isExpanded: true,
     decoration: InputDecoration(labelText: label),
-    items: units[kind]!
+    items: conversionUnits[kind]!
         .map((item) => DropdownMenuItem(value: item, child: Text(item)))
         .toList(),
     onChanged: changed,
   );
-
-  String _format(double value) =>
-      value.toStringAsFixed(6).replaceFirst(RegExp(r'\.?0+$'), '');
 }

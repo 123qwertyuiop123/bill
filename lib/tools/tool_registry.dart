@@ -9,6 +9,7 @@ import 'bill_split/bill_split_screen.dart';
 import 'calculator/calculator_screen.dart';
 import 'chmod_calculator/chmod_calculator_screen.dart';
 import 'color_contrast/color_contrast_screen.dart';
+import 'coordinate_tool/coordinate_tool_screen.dart';
 import 'csv_json_converter/csv_json_converter_screen.dart';
 import 'cron_parser/cron_parser_screen.dart';
 import 'date_calculator/date_calculator_screen.dart';
@@ -74,7 +75,7 @@ abstract final class ToolRegistry {
     ToolDefinition(
       id: 'unit_converter',
       title: '单位换算',
-      description: '长度、重量与温度换算',
+      description: '物理单位与数据容量换算',
       category: ToolCategory.calculation,
       icon: Icons.straighten_outlined,
       builder: _unitConverter,
@@ -250,7 +251,7 @@ abstract final class ToolRegistry {
     ToolDefinition(
       id: 'color_contrast',
       title: '颜色与对比度',
-      description: '检查 WCAG 对比度与色觉模拟',
+      description: '颜色格式、对比度与色觉模拟',
       category: ToolCategory.productivity,
       icon: Icons.contrast,
       builder: _colorContrast,
@@ -440,6 +441,14 @@ abstract final class ToolRegistry {
       builder: _geometryCalculator,
     ),
     ToolDefinition(
+      id: 'coordinate_tool',
+      title: '地理坐标',
+      description: '坐标格式、距离与初始方位',
+      category: ToolCategory.calculation,
+      icon: Icons.public_outlined,
+      builder: _coordinateTool,
+    ),
+    ToolDefinition(
       id: 'matrix_calculator',
       title: '矩阵计算',
       description: '小型方阵行列式、转置与求逆',
@@ -538,6 +547,8 @@ abstract final class ToolRegistry {
       const QuadraticSolverScreen();
   static Widget _geometryCalculator(BuildContext context) =>
       const GeometryCalculatorScreen();
+  static Widget _coordinateTool(BuildContext context) =>
+      const CoordinateToolScreen();
   static Widget _matrixCalculator(BuildContext context) =>
       const MatrixCalculatorScreen();
   static Widget _loanCalculator(BuildContext context) =>

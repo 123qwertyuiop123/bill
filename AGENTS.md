@@ -22,7 +22,7 @@ Current tools:
 |---|---|---|
 | `expense` | 收支账本 | Record income and expenses, categorize entries, calculate monthly totals, manage multiple monthly TXT files, and sync public TXT copies by year. |
 | `calculator` | 计算器 | Safe basic addition, subtraction, multiplication, and division without evaluating code. |
-| `unit_converter` | 单位换算 | Convert length, weight, and temperature units. Extend this tool instead of creating another general unit converter. |
+| `unit_converter` | 单位换算 | Convert length, weight, temperature, and decimal SI or binary IEC data-capacity units. Extend this tool instead of creating another general unit converter. |
 | `date_calculator` | 日期计算 | Calculate the interval between dates and add or subtract days from a date. |
 | `password_generator` | 密码生成 | Generate offline passwords with a cryptographically secure random source and selectable character groups; conservatively assess bounded passwords for common, repeated, and sequential weak patterns without persistence or upload. |
 | `text_tools` | 文本工具 | Count characters, words, and lines; convert letter case; trim lines; remove blank lines; encode and strictly decode bounded HTML entities. General text transforms belong here when they do not need a separate workflow. |
@@ -44,7 +44,7 @@ Current tools:
 | `uuid_generator` | UUID 生成 | Generate bounded batches of UUID v4 or RFC 9562 UUID v7 values with the platform cryptographically secure random source; results remain in memory and v7 is never presented as a secret token. |
 | `regex_tester` | 正则测试 | Test bounded regular expressions in a killable background isolate with timeout protection and bounded match output. |
 | `hash_generator` | 哈希生成 | Generate bounded UTF-8 text digests, SHA-256/SHA-512 HMAC values, or stream a user-selected Android file up to 512 MB through the system document picker for MD5/SHA verification; never upload, modify, log, or persist file content, keys, or paths. |
-| `color_contrast` | 颜色与对比度 | Parse bounded HEX colors, calculate WCAG contrast ratios and AA/AAA thresholds, and preview three color-vision-deficiency transformations locally without making medical claims. |
+| `color_contrast` | 颜色与对比度 | Strictly convert bounded HEX/RGB/HSL/HSV colors, calculate WCAG contrast ratios and AA/AAA thresholds, and preview three color-vision-deficiency transformations locally without making medical claims. |
 | `jwt_viewer` | JWT 查看 | Decode bounded JWT Header and Payload JSON locally, display expiry hints, and explicitly never claim signature validity. |
 | `csv_json_converter` | CSV/JSON 转换 | Convert bounded RFC-4180-style CSV tables and flat JSON object arrays locally with row, column, and output limits. |
 | `cron_parser` | Cron 解析 | Parse bounded standard five-field Cron expressions offline and calculate five future runs in the device local timezone. |
@@ -68,6 +68,7 @@ Current tools:
 | `resistor_decoder` | 电阻解码 | Decode four/five resistor color bands with tolerance and range, or strict three/four ASCII digit SMD codes; never infer SMD tolerance or substitute for physical measurement. |
 | `quadratic_solver` | 二次方程 | Solve a fixed quadratic with bounded finite coefficients, real/complex roots, discriminant and linear/identity/no-solution fallbacks; never evaluate expressions. |
 | `geometry_calculator` | 几何计算 | Calculate rectangle, circle and three-side triangle area/perimeter with bounded positive lengths and stable triangle validation; no unit conversion or ratio reduction. |
+| `coordinate_tool` | 地理坐标 | Convert bounded manual latitude/longitude values between decimal degrees and DMS, and estimate WGS84 spherical great-circle distance plus initial bearing without location permission or navigation claims. |
 | `matrix_calculator` | 矩阵计算 | Calculate determinant, transpose and inverse for bounded 2×2/3×3 matrices, rejecting unreliable near-singular inverses; no higher-order matrices or matrix multiplication. |
 | `loan_calculator` | 贷款计算 | Estimate bounded fixed-rate equal-payment loans, totals and up to 600 monthly amortization rows locally; results exclude fees, changing rates and financial advice. |
 
@@ -95,6 +96,8 @@ Candidate tools checked against the current inventory:
 - EIA-96, six-band temperature coefficients, higher-order matrices, matrix multiplication and additional geometry workflows require a separate scope and UI review.
 - Now covered: color-vision preview extends `color_contrast`; Code 128, EAN-13 and UPC-A generation extends `qr_code`; fixed-rate equal-payment amortization belongs to `loan_calculator`. Extend these modules instead of adding duplicates.
 - Now covered: bounded local password-strength hints extend `password_generator`; IANA world-time conversion extends `timestamp_converter`; UUID v7 extends `uuid_generator`. Extend these modules instead of adding duplicate entries.
+- Now covered: HEX/RGB/HSL/HSV conversion extends `color_contrast`, decimal SI and binary IEC data-capacity conversion extends `unit_converter`, and manual DD/DMS plus great-circle calculations belong to `coordinate_tool`. Extend these modules instead of adding duplicate entries.
+- Device location, route planning, turn-by-turn navigation, elevation models and professional geodesy are outside the reviewed `coordinate_tool` scope.
 - Barcode scanning/camera workflows, floating-rate loans, regulatory APR, fees, taxes and personalized financial advice are outside the current reviewed scope.
 - Do not add a separate ASCII table; ASCII inspection is a filter inside `unicode_inspector`.
 - JSONPath or other general JSON queries should extend `json_tool` instead of creating another JSON workbench.

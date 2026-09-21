@@ -175,6 +175,8 @@ class _PasswordGeneratorScreenState extends State<PasswordGeneratorScreen> {
       controller: evaluationController,
       obscureText: obscureEvaluation,
       maxLength: maxPasswordEvaluationLength,
+      // 保留完整粘贴内容交给逻辑层拒绝，避免评估被静默截断后的另一个密码。
+      maxLengthEnforcement: MaxLengthEnforcement.none,
       enableSuggestions: false,
       autocorrect: false,
       decoration: InputDecoration(

@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('tool registry uses unique stable ids', () {
     final ids = ToolRegistry.tools.map((tool) => tool.id).toList();
-    expect(ToolRegistry.tools, hasLength(50));
+    expect(ToolRegistry.tools, hasLength(51));
     expect(ids.toSet(), hasLength(ids.length));
     expect(ids, contains('expense'));
     expect(ids, contains('json_tool'));
@@ -46,6 +46,7 @@ void main() {
         'geometry_calculator',
         'matrix_calculator',
         'loan_calculator',
+        'coordinate_tool',
       ]),
     );
   });

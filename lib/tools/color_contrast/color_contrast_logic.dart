@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 const maxColorInputLength = 7;
+const maxColorFormatInputLength = 64;
 
 class RgbColor {
   const RgbColor(this.red, this.green, this.blue);
@@ -12,6 +13,243 @@ class RgbColor {
   final int blue;
 
   Color get color => Color.fromARGB(255, red, green, blue);
+}
+
+enum ColorInputFormat { hex, rgb, hsl, hsv }
+
+extension ColorInputFormatLabel on ColorInputFormat {
+  String get label => switch (this) {
+    ColorInputFormat.hex => 'HEX',
+    ColorInputFormat.rgb => 'RGB',
+    ColorInputFormat.hsl => 'HSL',
+    ColorInputFormat.hsv => 'HSV',
+  };
+
+  String get example => switch (this) {
+    ColorInputFormat.hex => '#197A4A',
+    ColorInputFormat.rgb => '25, 122, 74',
+    ColorInputFormat.hsl => '149, 66%, 29%',
+    ColorInputFormat.hsv => '149, 80%, 48%',
+  };
+}
+
+class ColorFormatConversionResult {
+  const ColorFormatConversionResult({
+    this.color,
+    this.hex,
+    this.rgb,
+    this.hsl,
+    this.hsv,
+    this.error,
+  });
+
+  final RgbColor? color;
+  final String? hex;
+  final String? rgb;
+  final String? hsl;
+  final String? hsv;
+  final String? error;
+  bool get isSuccess => error == null;
+}
+
+/// 严格解析常见颜色格式并统一转换为不透明 sRGB；不接受 CSS 表达式或脚本内容。
+ColorFormatConversionResult convertColorFormat(
+  String input,
+  ColorInputFormat format,
+) {
+  if (input.trim().isEmpty) {
+    return const ColorFormatConversionResult(error: '请输入颜色数值');
+  }
+  if (input.length > maxColorFormatInputLength) {
+    return const ColorFormatConversionResult(error: '颜色输入不能超过 64 个字符');
+  }
+  final color = switch (format) {
+    ColorInputFormat.hex => parseHexColor(input),
+    ColorInputFormat.rgb => _parseRgb(input),
+    ColorInputFormat.hsl => _parseHsl(input),
+    ColorInputFormat.hsv => _parseHsv(input),
+  };
+  if (color == null) {
+    return ColorFormatConversionResult(
+      error: switch (format) {
+        ColorInputFormat.hex => '请输入 #RGB 或 #RRGGBB 格式',
+        ColorInputFormat.rgb => 'RGB 应为三个 0–255 通道，例如 25, 122, 74',
+        ColorInputFormat.hsl => 'HSL 应为色相 0–360 和两个 0–100% 通道',
+        ColorInputFormat.hsv => 'HSV 应为色相 0–360 和两个 0–100% 通道',
+      },
+    );
+  }
+  final hsl = _rgbToHsl(color);
+  final hsv = _rgbToHsv(color);
+  final hex =
+      '#${color.red.toRadixString(16).padLeft(2, '0')}'
+              '${color.green.toRadixString(16).padLeft(2, '0')}'
+              '${color.blue.toRadixString(16).padLeft(2, '0')}'
+          .toUpperCase();
+  return ColorFormatConversionResult(
+    color: color,
+    hex: hex,
+    rgb: '${color.red}, ${color.green}, ${color.blue}',
+    hsl:
+        '${_formatChannel(hsl.$1)}°, ${_formatChannel(hsl.$2)}%, ${_formatChannel(hsl.$3)}%',
+    hsv:
+        '${_formatChannel(hsv.$1)}°, ${_formatChannel(hsv.$2)}%, ${_formatChannel(hsv.$3)}%',
+  );
+}
+
+RgbColor? _parseRgb(String input) {
+  final parts = _functionalChannelParts(input, 'rgb');
+  if (parts == null) return null;
+  final values = parts.map(_parseRgbChannel).toList(growable: false);
+  if (values.any((value) => value == null)) return null;
+  return RgbColor(values[0]!, values[1]!, values[2]!);
+}
+
+RgbColor? _parseHsl(String input) {
+  final values = _parseCylindricalChannels(input, 'hsl');
+  if (!_validCylindricalChannels(values)) return null;
+  final hue = values![0] == 360 ? 0.0 : values[0];
+  final saturation = values[1] / 100;
+  final lightness = values[2] / 100;
+  final chroma = (1 - (2 * lightness - 1).abs()) * saturation;
+  final x = chroma * (1 - ((hue / 60) % 2 - 1).abs());
+  final match = lightness - chroma / 2;
+  final channels = _hueChannels(hue, chroma, x);
+  return RgbColor(
+    ((channels.$1 + match) * 255).round().clamp(0, 255),
+    ((channels.$2 + match) * 255).round().clamp(0, 255),
+    ((channels.$3 + match) * 255).round().clamp(0, 255),
+  );
+}
+
+RgbColor? _parseHsv(String input) {
+  final values = _parseCylindricalChannels(input, 'hsv');
+  if (!_validCylindricalChannels(values)) return null;
+  final hue = values![0] == 360 ? 0.0 : values[0];
+  final saturation = values[1] / 100;
+  final brightness = values[2] / 100;
+  final chroma = brightness * saturation;
+  final x = chroma * (1 - ((hue / 60) % 2 - 1).abs());
+  final match = brightness - chroma;
+  final channels = _hueChannels(hue, chroma, x);
+  return RgbColor(
+    ((channels.$1 + match) * 255).round().clamp(0, 255),
+    ((channels.$2 + match) * 255).round().clamp(0, 255),
+    ((channels.$3 + match) * 255).round().clamp(0, 255),
+  );
+}
+
+List<String>? _functionalChannelParts(String input, String functionName) {
+  var normalized = input.trim().toLowerCase();
+  final prefix = '$functionName(';
+  if (normalized.startsWith(prefix)) {
+    if (!normalized.endsWith(')')) return null;
+    normalized = normalized.substring(prefix.length, normalized.length - 1);
+  } else if (normalized.contains('(') || normalized.contains(')')) {
+    return null;
+  }
+  final parts = normalized.split(',').map((part) => part.trim()).toList();
+  if (parts.length != 3) return null;
+  return parts;
+}
+
+int? _parseRgbChannel(String input) {
+  if (!RegExp(r'^\d{1,3}$').hasMatch(input)) return null;
+  final value = int.parse(input);
+  return value <= 255 ? value : null;
+}
+
+List<double>? _parseCylindricalChannels(String input, String functionName) {
+  final parts = _functionalChannelParts(input, functionName);
+  if (parts == null ||
+      !_isDecimal(parts[0]) ||
+      !_isPercentage(parts[1]) ||
+      !_isPercentage(parts[2])) {
+    return null;
+  }
+  return [
+    double.parse(parts[0]),
+    double.parse(parts[1].substring(0, parts[1].length - 1)),
+    double.parse(parts[2].substring(0, parts[2].length - 1)),
+  ];
+}
+
+bool _isDecimal(String input) =>
+    RegExp(r'^(?:\d+(?:\.\d+)?|\.\d+)$').hasMatch(input);
+
+bool _isPercentage(String input) =>
+    input.endsWith('%') && _isDecimal(input.substring(0, input.length - 1));
+
+bool _validCylindricalChannels(List<double>? values) =>
+    values != null &&
+    values.length == 3 &&
+    values[0] >= 0 &&
+    values[0] <= 360 &&
+    values[1] >= 0 &&
+    values[1] <= 100 &&
+    values[2] >= 0 &&
+    values[2] <= 100;
+
+(double, double, double) _hueChannels(double hue, double chroma, double x) =>
+    switch (hue) {
+      < 60 => (chroma, x, 0),
+      < 120 => (x, chroma, 0),
+      < 180 => (0, chroma, x),
+      < 240 => (0, x, chroma),
+      < 300 => (x, 0, chroma),
+      _ => (chroma, 0, x),
+    };
+
+(double, double, double) _rgbToHsl(RgbColor color) {
+  final red = color.red / 255;
+  final green = color.green / 255;
+  final blue = color.blue / 255;
+  final maximum = math.max(red, math.max(green, blue));
+  final minimum = math.min(red, math.min(green, blue));
+  final delta = maximum - minimum;
+  final lightness = (maximum + minimum) / 2;
+  final saturation = delta == 0 ? 0.0 : delta / (1 - (2 * lightness - 1).abs());
+  return (
+    _hue(red, green, blue, maximum, delta),
+    saturation * 100,
+    lightness * 100,
+  );
+}
+
+(double, double, double) _rgbToHsv(RgbColor color) {
+  final red = color.red / 255;
+  final green = color.green / 255;
+  final blue = color.blue / 255;
+  final maximum = math.max(red, math.max(green, blue));
+  final minimum = math.min(red, math.min(green, blue));
+  final delta = maximum - minimum;
+  final saturation = maximum == 0 ? 0.0 : delta / maximum;
+  return (
+    _hue(red, green, blue, maximum, delta),
+    saturation * 100,
+    maximum * 100,
+  );
+}
+
+double _hue(
+  double red,
+  double green,
+  double blue,
+  double maximum,
+  double delta,
+) {
+  if (delta == 0) return 0;
+  final hue = maximum == red
+      ? 60 * (((green - blue) / delta) % 6)
+      : maximum == green
+      ? 60 * ((blue - red) / delta + 2)
+      : 60 * ((red - green) / delta + 4);
+  return hue < 0 ? hue + 360 : hue;
+}
+
+String _formatChannel(double value) {
+  final rounded = double.parse(value.toStringAsFixed(2));
+  return rounded.toStringAsFixed(2).replaceFirst(RegExp(r'\.?0+$'), '');
 }
 
 class ColorContrastResult {
