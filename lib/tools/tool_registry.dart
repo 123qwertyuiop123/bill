@@ -203,7 +203,7 @@ abstract final class ToolRegistry {
     ToolDefinition(
       id: 'url_tool',
       title: 'URL 编解码',
-      description: '编码、解码与查询参数解析',
+      description: '编解码、参数解析与国际域名转换',
       category: ToolCategory.text,
       icon: Icons.link,
       builder: _urlTool,
@@ -251,7 +251,7 @@ abstract final class ToolRegistry {
     ToolDefinition(
       id: 'color_contrast',
       title: '颜色与对比度',
-      description: '颜色格式、对比度与色觉模拟',
+      description: '颜色格式、对比度、色阶与色觉模拟',
       category: ToolCategory.productivity,
       icon: Icons.contrast,
       builder: _colorContrast,
@@ -339,7 +339,7 @@ abstract final class ToolRegistry {
     ToolDefinition(
       id: 'image_optimizer',
       title: '图片优化',
-      description: '离线压缩、缩放与格式转换',
+      description: '离线优化与图片隐私检查',
       category: ToolCategory.productivity,
       icon: Icons.photo_size_select_large_outlined,
       builder: _imageOptimizer,

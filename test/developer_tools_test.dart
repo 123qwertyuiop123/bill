@@ -110,6 +110,70 @@ void main() {
       );
     });
 
+    test('converts international domains with canonical Punycode', () {
+      final encoded = convertInternationalDomain(
+        'bücher.example',
+        DomainConversionDirection.unicodeToAscii,
+      );
+      expect(encoded.output, 'xn--bcher-kva.example');
+      expect(
+        convertInternationalDomain(
+          encoded.output,
+          DomainConversionDirection.asciiToUnicode,
+        ).output,
+        'bücher.example',
+      );
+      expect(
+        convertInternationalDomain(
+          '例子.测试',
+          DomainConversionDirection.unicodeToAscii,
+        ).output,
+        'xn--fsqu00a.xn--0zwm56d',
+      );
+    });
+
+    test('rejects URLs and malformed international-domain labels', () {
+      expect(
+        convertInternationalDomain(
+          'https://例子.测试',
+          DomainConversionDirection.unicodeToAscii,
+        ).isSuccess,
+        isFalse,
+      );
+      expect(
+        convertInternationalDomain(
+          'xn--',
+          DomainConversionDirection.asciiToUnicode,
+        ).isSuccess,
+        isFalse,
+      );
+      expect(
+        convertInternationalDomain(
+          '${'a' * 64}.example',
+          DomainConversionDirection.unicodeToAscii,
+        ).isSuccess,
+        isFalse,
+      );
+      for (final unsafe in ['a\u0080.example', 'a\u202E.example']) {
+        expect(
+          convertInternationalDomain(
+            unsafe,
+            DomainConversionDirection.unicodeToAscii,
+          ).isSuccess,
+          isFalse,
+        );
+      }
+      for (final unsafeAce in ['xn--a-ba.example', 'xn--a-qin.example']) {
+        expect(
+          convertInternationalDomain(
+            unsafeAce,
+            DomainConversionDirection.asciiToUnicode,
+          ).isSuccess,
+          isFalse,
+        );
+      }
+    });
+
     testWidgets('process button parses query parameters', (tester) async {
       await tester.pumpWidget(const MaterialApp(home: UrlToolScreen()));
       await tester.tap(find.text('处理'));
@@ -119,6 +183,60 @@ void main() {
         find.byKey(const Key('urlOutput')),
       );
       expect(output.controller?.text, contains('page: 1, 2'));
+    });
+
+    testWidgets('international-domain mode converts without opening a URL', (
+      tester,
+    ) async {
+      await tester.pumpWidget(const MaterialApp(home: UrlToolScreen()));
+      await tester.tap(find.text('国际域名'));
+      await tester.pumpAndSettle();
+      await tester.enterText(
+        find.byKey(const Key('urlInput')),
+        'bücher.example',
+      );
+      await tester.ensureVisible(find.byKey(const Key('processUrl')));
+      await tester.tap(find.byKey(const Key('processUrl')));
+      await tester.pump();
+
+      final output = tester.widget<TextField>(
+        find.byKey(const Key('urlOutput')),
+      );
+      expect(output.controller?.text, 'xn--bcher-kva.example');
+    });
+
+    testWidgets('switching international-domain mode preserves both drafts', (
+      tester,
+    ) async {
+      await tester.pumpWidget(const MaterialApp(home: UrlToolScreen()));
+      const standardDraft = 'https://example.com/?draft=保留';
+      const domainDraft = 'bücher.example';
+      await tester.enterText(find.byKey(const Key('urlInput')), standardDraft);
+
+      await tester.tap(find.text('国际域名'));
+      await tester.pump();
+      expect(find.text('Unicode → ASCII'), findsOneWidget);
+      await tester.enterText(find.byKey(const Key('urlInput')), domainDraft);
+
+      await tester.tap(find.text('参数解析'));
+      await tester.pump();
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const Key('urlInput')))
+            .controller!
+            .text,
+        standardDraft,
+      );
+
+      await tester.tap(find.text('国际域名'));
+      await tester.pump();
+      expect(
+        tester
+            .widget<TextField>(find.byKey(const Key('urlInput')))
+            .controller!
+            .text,
+        domainDraft,
+      );
     });
   });
 

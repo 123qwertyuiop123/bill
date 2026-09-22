@@ -52,6 +52,71 @@ class ColorFormatConversionResult {
   bool get isSuccess => error == null;
 }
 
+class ColorPaletteTone {
+  const ColorPaletteTone({
+    required this.tone,
+    required this.color,
+    required this.hex,
+  });
+
+  final int tone;
+  final RgbColor color;
+  final String hex;
+}
+
+class ColorPaletteResult {
+  const ColorPaletteResult({
+    this.seed,
+    this.tones = const [],
+    this.suggestedForeground,
+    this.foregroundContrast,
+    this.error,
+  });
+
+  final RgbColor? seed;
+  final List<ColorPaletteTone> tones;
+  final String? suggestedForeground;
+  final double? foregroundContrast;
+  final String? error;
+  bool get isSuccess => error == null;
+}
+
+/// 以种子色的色相和饱和度生成固定的五档 HSL 明度色阶。
+/// 该结果适合界面草案，不替代完整品牌色彩系统或人工无障碍审查。
+ColorPaletteResult generateColorPalette(String input) {
+  final seed = parseHexColor(input);
+  if (seed == null) {
+    return const ColorPaletteResult(error: '请输入 #RGB 或 #RRGGBB 格式的种子颜色');
+  }
+  final hsl = _rgbToHsl(seed);
+  const toneValues = [10, 30, 50, 70, 90];
+  final tones = toneValues
+      .map((tone) {
+        // 极暗和极亮色适度降低饱和度，避免通道过早裁切并保留层次。
+        final saturationFactor = tone == 10 || tone == 90 ? 0.82 : 1.0;
+        final color = _parseHsl(
+          '${hsl.$1}, ${hsl.$2 * saturationFactor}%, $tone%',
+        )!;
+        return ColorPaletteTone(
+          tone: tone,
+          color: color,
+          hex: _hexColor(color),
+        );
+      })
+      .toList(growable: false);
+
+  const black = RgbColor(0, 0, 0);
+  const white = RgbColor(255, 255, 255);
+  final blackRatio = _contrastRatio(seed, black);
+  final whiteRatio = _contrastRatio(seed, white);
+  return ColorPaletteResult(
+    seed: seed,
+    tones: tones,
+    suggestedForeground: blackRatio >= whiteRatio ? '#000000' : '#FFFFFF',
+    foregroundContrast: math.max(blackRatio, whiteRatio),
+  );
+}
+
 /// 严格解析常见颜色格式并统一转换为不透明 sRGB；不接受 CSS 表达式或脚本内容。
 ColorFormatConversionResult convertColorFormat(
   String input,
@@ -81,11 +146,7 @@ ColorFormatConversionResult convertColorFormat(
   }
   final hsl = _rgbToHsl(color);
   final hsv = _rgbToHsv(color);
-  final hex =
-      '#${color.red.toRadixString(16).padLeft(2, '0')}'
-              '${color.green.toRadixString(16).padLeft(2, '0')}'
-              '${color.blue.toRadixString(16).padLeft(2, '0')}'
-          .toUpperCase();
+  final hex = _hexColor(color);
   return ColorFormatConversionResult(
     color: color,
     hex: hex,
@@ -408,3 +469,17 @@ double _relativeLuminance(RgbColor color) {
       0.7152 * _linearChannel(color.green) +
       0.0722 * _linearChannel(color.blue);
 }
+
+double _contrastRatio(RgbColor first, RgbColor second) {
+  final firstLuminance = _relativeLuminance(first);
+  final secondLuminance = _relativeLuminance(second);
+  final lighter = math.max(firstLuminance, secondLuminance);
+  final darker = math.min(firstLuminance, secondLuminance);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+String _hexColor(RgbColor color) =>
+    '#${color.red.toRadixString(16).padLeft(2, '0')}'
+            '${color.green.toRadixString(16).padLeft(2, '0')}'
+            '${color.blue.toRadixString(16).padLeft(2, '0')}'
+        .toUpperCase();

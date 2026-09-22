@@ -33,6 +33,28 @@ class OptimizedImageInfo {
   final int height;
 }
 
+/// 只承载经过白名单筛选的元数据摘要，不包含位置坐标、路径或原始 EXIF。
+class ImagePrivacyInfo {
+  const ImagePrivacyInfo({
+    required this.hasCaptureTime,
+    required this.hasDeviceInfo,
+    required this.hasLocation,
+    required this.orientation,
+    this.captureTime,
+    this.cameraModel,
+  });
+
+  final bool hasCaptureTime;
+  final bool hasDeviceInfo;
+  final bool hasLocation;
+  final String orientation;
+  final String? captureTime;
+  final String? cameraModel;
+
+  bool get hasSensitiveMetadata =>
+      hasCaptureTime || hasDeviceInfo || hasLocation;
+}
+
 /// 图片字节始终留在 Android 原生层，避免大图跨 MethodChannel 复制。
 class ImageOptimizerService {
   const ImageOptimizerService();
@@ -92,6 +114,36 @@ class ImageOptimizerService {
     return OptimizedImageInfo(size: size, width: width, height: height);
   }
 
+  Future<ImagePrivacyInfo> inspectMetadata() async {
+    final value = await _invokeMap('inspectImageMetadata');
+    if (value == null) throw const ImageOptimizerException('元数据检查失败');
+    final hasCaptureTime = value['hasCaptureTime'];
+    final hasDeviceInfo = value['hasDeviceInfo'];
+    final hasLocation = value['hasLocation'];
+    final orientation = value['orientation'];
+    final captureTime = value['captureTime'];
+    final cameraModel = value['cameraModel'];
+    if (hasCaptureTime is! bool ||
+        hasDeviceInfo is! bool ||
+        hasLocation is! bool ||
+        orientation is! String ||
+        orientation.length > 32 ||
+        captureTime is! String? ||
+        cameraModel is! String? ||
+        (captureTime?.length ?? 0) > 32 ||
+        (cameraModel?.length ?? 0) > 80) {
+      throw const ImageOptimizerException('元数据结果无效');
+    }
+    return ImagePrivacyInfo(
+      hasCaptureTime: hasCaptureTime,
+      hasDeviceInfo: hasDeviceInfo,
+      hasLocation: hasLocation,
+      orientation: orientation,
+      captureTime: captureTime,
+      cameraModel: cameraModel,
+    );
+  }
+
   Future<String> save() async {
     try {
       final path = await _channel.invokeMethod<String>('saveOptimizedImage');
@@ -127,6 +179,7 @@ class ImageOptimizerService {
     'busy' => '已有图片任务正在进行，请稍候',
     'no_image' => '请先选择图片',
     'no_result' => '请先完成图片优化',
+    'metadata_unsupported' => '当前 Android 版本不支持元数据检查',
     _ => '图片处理失败，请更换图片后重试',
   };
 }

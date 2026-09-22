@@ -24,13 +24,13 @@
 - 列表排序、去重、打乱和清理
 - JSON 格式化、压缩和校验
 - Base64 UTF-8 文本编码与解码
-- URL 组件编码、解码和查询参数解析
+- URL 组件编码、解码、查询参数解析，以及严格有界的国际化域名 Punycode 双向转换
 - Unix 秒/毫秒时间戳、本地日期与世界时区换算
 - 二、八、十、十六进制任意精度整数转换
 - 使用安全随机源的 UUID v4 / v7 批量生成
 - 带超时隔离保护的正则表达式测试
 - MD5、SHA-1、SHA-256 和 SHA-512 文本哈希，SHA-256/SHA-512 HMAC，以及 Android 系统文件选择器提供的只读文件完整性校验（最大 512 MB）
-- HEX、RGB、HSL、HSV 颜色格式转换，WCAG 对比度与 AA/AAA 检查，以及红、绿、蓝三类色觉模拟预览
+- HEX、RGB、HSL、HSV 颜色格式转换，WCAG 对比度与 AA/AAA 检查、五档主题色阶，以及红、绿、蓝三类色觉模拟预览
 - 只读 JWT Header、Payload 和有效期查看
 - CSV 与扁平 JSON 对象数组双向转换
 - 标准 5 段 Cron 解析和后续执行时间计算
@@ -41,7 +41,7 @@
 - 安全 Markdown 子集预览，不执行 HTML、脚本或网络资源
 - 常用 HTTP 状态码离线查询，不发送网络请求
 - 常见扩展名与 MIME 类型离线查询，不读取或嗅探文件
-- JPEG、PNG 和 WebP 图片离线压缩、缩放与格式转换，默认移除元数据，输出保存到 `Pictures/ZM工具箱`
+- JPEG、PNG 和 WebP 图片离线压缩、缩放与格式转换；可检查拍摄时间、设备、位置字段是否存在和方向等白名单元数据，默认优化输出会移除元数据并保存到 `Pictures/ZM工具箱`
 - 宽高比约分与等比尺寸换算
 - YAML 与 JSON 双向转换，限制输入、输出、节点数和嵌套深度
 - XML 格式化、压缩和校验，拒绝 DTD 与实体声明
@@ -164,13 +164,13 @@ lib/
 │   ├── list_processor/     # 列表处理
 │   ├── json_tool/          # JSON 工具
 │   ├── base64_tool/        # Base64
-│   ├── url_tool/           # URL 编解码与参数解析
+│   ├── url_tool/           # URL 编解码、参数解析与国际域名转换
 │   ├── timestamp_converter/ # Unix 时间戳与世界时区换算
 │   ├── number_base_converter/ # 进制转换
 │   ├── uuid_generator/     # UUID v4 / v7 生成
 │   ├── regex_tester/       # 正则测试
 │   ├── hash_generator/     # 文本/文件哈希与 HMAC
-│   ├── color_contrast/     # 颜色与对比度
+│   ├── color_contrast/     # 颜色转换、对比度、色觉模拟与主题色阶
 │   ├── jwt_viewer/         # JWT 只读查看
 │   ├── csv_json_converter/ # CSV/JSON 转换
 │   ├── cron_parser/        # Cron 解析
@@ -181,7 +181,7 @@ lib/
 │   ├── markdown_preview/   # Markdown 预览
 │   ├── http_status_reference/ # HTTP 状态码
 │   ├── mime_type_reference/ # MIME 类型
-│   ├── image_optimizer/    # 图片压缩、缩放与格式转换
+│   ├── image_optimizer/    # 图片优化与 EXIF 隐私摘要检查
 │   ├── aspect_ratio_calculator/ # 宽高比计算
 │   ├── yaml_json_converter/ # YAML/JSON 转换
 │   ├── xml_tool/           # XML 格式化、压缩和校验

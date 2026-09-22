@@ -30,6 +30,17 @@ void main() {
     );
   });
 
+  test('generates five bounded theme tones and a readable foreground', () {
+    final result = generateColorPalette('#197A4A');
+    expect(result.isSuccess, true);
+    expect(result.tones.map((tone) => tone.tone), [10, 30, 50, 70, 90]);
+    expect(result.tones.map((tone) => tone.hex).toSet(), hasLength(5));
+    expect(result.tones.every((tone) => parseHexColor(tone.hex) != null), true);
+    expect(result.suggestedForeground, anyOf('#000000', '#FFFFFF'));
+    expect(result.foregroundContrast, greaterThanOrEqualTo(4.5));
+    expect(generateColorPalette('red').isSuccess, false);
+  });
+
   testWidgets('switches to simulation and clears stale result', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: ColorContrastScreen()));
     await tester.ensureVisible(find.byKey(const Key('runColorCheck')));
@@ -62,5 +73,18 @@ void main() {
     await tester.tap(find.byKey(const Key('runColorCheck')));
     await tester.pump();
     expect(find.text('请输入 #RGB 或 #RRGGBB 格式的颜色'), findsOneWidget);
+  });
+
+  testWidgets('theme palette mode renders copyable tone cards', (tester) async {
+    await tester.pumpWidget(const MaterialApp(home: ColorContrastScreen()));
+    await tester.tap(find.text('主题色阶'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.byKey(const Key('runColorCheck')));
+    await tester.tap(find.byKey(const Key('runColorCheck')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('paletteResult')), findsOneWidget);
+    expect(find.text('建议前景色'), findsOneWidget);
+    expect(find.textContaining('#'), findsWidgets);
   });
 }

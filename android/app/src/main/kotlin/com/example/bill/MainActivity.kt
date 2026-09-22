@@ -114,6 +114,7 @@ class MainActivity : FlutterActivity() {
             .setMethodCallHandler { call, result ->
                 when (call.method) {
                     "pickImage" -> pickImage(result)
+                    "inspectImageMetadata" -> inspectImageMetadata(result)
                     "optimizeImage" -> optimizeImage(call, result)
                     "saveOptimizedImage" -> requestImageSave(result)
                     else -> result.notImplemented()
@@ -399,6 +400,115 @@ class MainActivity : FlutterActivity() {
             }
         }
     }
+
+    private fun inspectImageMetadata(result: MethodChannel.Result) {
+        val source = selectedImageFile
+        if (source == null || !source.exists()) {
+            result.error("no_image", "Select an image first", null)
+            return
+        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+            result.error("metadata_unsupported", "EXIF is unavailable on this Android version", null)
+            return
+        }
+        if (imageBusy) {
+            result.error("busy", "An image operation is already running", null)
+            return
+        }
+        imageBusy = true
+        imageExecutor.execute {
+            try {
+                val exif = ExifInterface(source.absolutePath)
+                val captureTime = sanitizeExifText(
+                    exif.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL)
+                        ?: exif.getAttribute(ExifInterface.TAG_DATETIME),
+                    32,
+                )
+                val make = sanitizeExifText(exif.getAttribute(ExifInterface.TAG_MAKE), 36)
+                val model = sanitizeExifText(exif.getAttribute(ExifInterface.TAG_MODEL), 36)
+                val cameraModel = listOfNotNull(make, model)
+                    .distinct()
+                    .joinToString(" ")
+                    .take(80)
+                    .ifBlank { null }
+                // 任一 GPS IFD 隐私字段都应触发提示；绝不把字段值、坐标或原始 EXIF 回传给 Dart。
+                val privacyGpsTags = listOf(
+                    "GPSVersionID",
+                    "GPSLatitudeRef",
+                    "GPSLatitude",
+                    "GPSLongitudeRef",
+                    "GPSLongitude",
+                    "GPSAltitudeRef",
+                    "GPSAltitude",
+                    "GPSTimeStamp",
+                    "GPSSatellites",
+                    "GPSStatus",
+                    "GPSMeasureMode",
+                    "GPSDOP",
+                    "GPSSpeedRef",
+                    "GPSSpeed",
+                    "GPSTrackRef",
+                    "GPSTrack",
+                    "GPSImgDirectionRef",
+                    "GPSImgDirection",
+                    "GPSMapDatum",
+                    "GPSDestLatitudeRef",
+                    "GPSDestLatitude",
+                    "GPSDestLongitudeRef",
+                    "GPSDestLongitude",
+                    "GPSDestBearingRef",
+                    "GPSDestBearing",
+                    "GPSDestDistanceRef",
+                    "GPSDestDistance",
+                    "GPSProcessingMethod",
+                    "GPSAreaInformation",
+                    "GPSDateStamp",
+                    "GPSDifferential",
+                    "GPSHPositioningError",
+                )
+                val hasLocation = privacyGpsTags.any { tag ->
+                    !exif.getAttribute(tag).isNullOrBlank()
+                }
+                val orientation = when (
+                    exif.getAttributeInt(
+                        ExifInterface.TAG_ORIENTATION,
+                        ExifInterface.ORIENTATION_UNDEFINED,
+                    )
+                ) {
+                    ExifInterface.ORIENTATION_FLIP_HORIZONTAL -> "flip_horizontal"
+                    ExifInterface.ORIENTATION_ROTATE_180 -> "rotate_180"
+                    ExifInterface.ORIENTATION_FLIP_VERTICAL -> "flip_vertical"
+                    ExifInterface.ORIENTATION_TRANSPOSE -> "transpose"
+                    ExifInterface.ORIENTATION_ROTATE_90 -> "rotate_90"
+                    ExifInterface.ORIENTATION_TRANSVERSE -> "transverse"
+                    ExifInterface.ORIENTATION_ROTATE_270 -> "rotate_270"
+                    ExifInterface.ORIENTATION_NORMAL -> "normal"
+                    else -> "unknown"
+                }
+                runOnUiThread {
+                    imageBusy = false
+                    result.success(
+                        mapOf(
+                            "hasCaptureTime" to (captureTime != null),
+                            "hasDeviceInfo" to (cameraModel != null),
+                            "hasLocation" to hasLocation,
+                            "orientation" to orientation,
+                            "captureTime" to captureTime,
+                            "cameraModel" to cameraModel,
+                        ),
+                    )
+                }
+            } catch (_: Exception) {
+                finishImageError(result, "metadata_failed", "Unable to inspect image metadata")
+            }
+        }
+    }
+
+    private fun sanitizeExifText(value: String?, maxLength: Int): String? = value
+        ?.replace(Regex("[\\p{Cc}\\p{Cf}]"), " ")
+        ?.trim()
+        ?.take(maxLength)
+        ?.ifBlank { null }
 
     private fun calculateImageSampleSize(targetWidth: Int, targetHeight: Int): Int {
         var sample = 1

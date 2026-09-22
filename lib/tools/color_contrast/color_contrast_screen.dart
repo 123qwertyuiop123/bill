@@ -5,7 +5,7 @@ import '../../app/widgets/tool_widgets.dart';
 import '../../core/app_theme.dart';
 import 'color_contrast_logic.dart';
 
-enum _ColorMode { contrast, conversion, simulation }
+enum _ColorMode { contrast, conversion, simulation, palette }
 
 /// 颜色检查完全在内存中完成；色觉模拟只用于无障碍设计预览。
 class ColorContrastScreen extends StatefulWidget {
@@ -19,18 +19,21 @@ class _ColorContrastScreenState extends State<ColorContrastScreen> {
   final foregroundController = TextEditingController(text: '#1F2937');
   final backgroundController = TextEditingController(text: '#FFFFFF');
   final formatInputController = TextEditingController(text: '#197A4A');
+  final paletteInputController = TextEditingController(text: '#197A4A');
   _ColorMode mode = _ColorMode.contrast;
   ColorInputFormat inputFormat = ColorInputFormat.hex;
   ColorVisionType visionType = ColorVisionType.deuteranopia;
   ColorContrastResult? contrastResult;
   ColorFormatConversionResult? conversionResult;
   ColorVisionSimulationResult? simulationResult;
+  ColorPaletteResult? paletteResult;
 
   @override
   void dispose() {
     foregroundController.dispose();
     backgroundController.dispose();
     formatInputController.dispose();
+    paletteInputController.dispose();
     super.dispose();
   }
 
@@ -38,12 +41,14 @@ class _ColorContrastScreenState extends State<ColorContrastScreen> {
     contrastResult = null;
     conversionResult = null;
     simulationResult = null;
+    paletteResult = null;
   });
 
   void _run() => setState(() {
     contrastResult = null;
     conversionResult = null;
     simulationResult = null;
+    paletteResult = null;
     if (mode == _ColorMode.contrast) {
       contrastResult = checkColorContrast(
         foregroundController.text,
@@ -54,12 +59,14 @@ class _ColorContrastScreenState extends State<ColorContrastScreen> {
         formatInputController.text,
         inputFormat,
       );
-    } else {
+    } else if (mode == _ColorMode.simulation) {
       simulationResult = simulateColorVision(
         foregroundController.text,
         backgroundController.text,
         visionType,
       );
+    } else {
+      paletteResult = generateColorPalette(paletteInputController.text);
     }
   });
 
@@ -73,7 +80,8 @@ class _ColorContrastScreenState extends State<ColorContrastScreen> {
     final error =
         contrastResult?.error ??
         conversionResult?.error ??
-        simulationResult?.error;
+        simulationResult?.error ??
+        paletteResult?.error;
     return ToolPageScaffold(
       title: '颜色与对比度',
       child: ListView(
@@ -92,6 +100,7 @@ class _ColorContrastScreenState extends State<ColorContrastScreen> {
                   value: _ColorMode.simulation,
                   label: Text('色觉模拟'),
                 ),
+                ButtonSegment(value: _ColorMode.palette, label: Text('主题色阶')),
               ],
               selected: {mode},
               showSelectedIcon: false,
@@ -100,6 +109,7 @@ class _ColorContrastScreenState extends State<ColorContrastScreen> {
                 contrastResult = null;
                 conversionResult = null;
                 simulationResult = null;
+                paletteResult = null;
               }),
             ),
           ),
@@ -123,6 +133,16 @@ class _ColorContrastScreenState extends State<ColorContrastScreen> {
                   conversionResult = null;
                 });
               },
+              onChanged: _invalidate,
+            )
+          else if (mode == _ColorMode.palette)
+            _ColorInput(
+              label: '种子颜色',
+              fieldKey: const Key('paletteColorInput'),
+              controller: paletteInputController,
+              color:
+                  parseHexColor(paletteInputController.text)?.color ??
+                  const Color(0xff197a4a),
               onChanged: _invalidate,
             )
           else ...[
@@ -227,6 +247,10 @@ class _ColorContrastScreenState extends State<ColorContrastScreen> {
             const SizedBox(height: 16),
             _ColorFormatResult(result: conversionResult!),
           ],
+          if (paletteResult?.isSuccess ?? false) ...[
+            const SizedBox(height: 16),
+            _ColorPaletteResultCard(result: paletteResult!),
+          ],
           const SizedBox(height: 16),
           FilledButton(
             key: const Key('runColorCheck'),
@@ -235,6 +259,7 @@ class _ColorContrastScreenState extends State<ColorContrastScreen> {
               _ColorMode.contrast => '检查对比度',
               _ColorMode.conversion => '转换格式',
               _ColorMode.simulation => '开始模拟',
+              _ColorMode.palette => '生成色阶',
             }),
           ),
           const SizedBox(height: 8),
@@ -242,8 +267,89 @@ class _ColorContrastScreenState extends State<ColorContrastScreen> {
             _ColorMode.contrast => '结果依据 WCAG 对比度阈值，仅在本机计算。',
             _ColorMode.conversion => '颜色转换仅在本机完成，不读取图片或保存输入。',
             _ColorMode.simulation => '色觉模拟仅作无障碍设计预览，不代表医学诊断。',
+            _ColorMode.palette => '色阶基于固定 HSL 明度生成；发布前仍需逐项检查实际文字对比度。',
           }, style: const TextStyle(color: AppColors.muted)),
         ],
+      ),
+    );
+  }
+}
+
+class _ColorPaletteResultCard extends StatelessWidget {
+  const _ColorPaletteResultCard({required this.result});
+
+  final ColorPaletteResult result;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    key: const Key('paletteResult'),
+    margin: EdgeInsets.zero,
+    child: Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('主题色阶', style: Theme.of(context).textTheme.titleMedium),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final tone in result.tones) _PaletteSwatch(tone: tone),
+            ],
+          ),
+          const Divider(height: 28),
+          _CopyableColorRow(label: '建议前景色', value: result.suggestedForeground!),
+          Text(
+            '与种子色对比度 ${result.foregroundContrast!.toStringAsFixed(2)} : 1',
+            style: const TextStyle(color: AppColors.muted),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+class _PaletteSwatch extends StatelessWidget {
+  const _PaletteSwatch({required this.tone});
+
+  final ColorPaletteTone tone;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = tone.color.color;
+    final foreground =
+        ThemeData.estimateBrightnessForColor(color) == Brightness.dark
+        ? Colors.white
+        : Colors.black;
+    return Semantics(
+      button: true,
+      label: '色阶 ${tone.tone}，${tone.hex}，点击复制',
+      child: InkWell(
+        onTap: () async {
+          await Clipboard.setData(ClipboardData(text: tone.hex));
+          if (context.mounted) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(SnackBar(content: Text('已复制 ${tone.hex}')));
+          }
+        },
+        borderRadius: BorderRadius.circular(10),
+        child: Ink(
+          width: 96,
+          height: 74,
+          decoration: BoxDecoration(
+            color: color,
+            border: Border.all(color: AppColors.line),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Center(
+            child: Text(
+              '${tone.tone}\n${tone.hex}',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: foreground, fontWeight: FontWeight.w700),
+            ),
+          ),
+        ),
       ),
     );
   }

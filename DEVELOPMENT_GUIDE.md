@@ -283,5 +283,6 @@ flutter build apk --release --no-pub
 - `design/offline-tools-batch-9-v1.png`：颜色与对比度扩展、固定利率贷款计算和二维码/一维条码扩展的自审通过设计；范围、去重、依赖和审查结论见同目录 `offline-tools-batch-9-proposal.md`。
 - `design/offline-tools-batch-10-v1.png`：密码强度评估、世界时区换算和 UUID v7 扩展的自审通过设计；隐私、时区数据、标识符边界和去重结论见同目录 `offline-tools-batch-10-proposal.md`。
 - `design/offline-tools-batch-11-v1.png`：地理坐标工具、颜色格式转换和数据容量换算的自审通过设计；坐标范围、单位区分、权限与去重边界见同目录 `offline-tools-batch-11-proposal.md`。
+- `design/offline-tools-batch-12-v1.png`：图片隐私检查、国际化域名转换和主题色阶扩展的自审通过设计；EXIF 白名单、Punycode 范围与色阶边界见同目录 `offline-tools-batch-12-proposal.md`。
 
 开发 UI 时应先对照这些设计，若设计之间冲突，以用户最后确认的版本为准。

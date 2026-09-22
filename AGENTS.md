@@ -38,13 +38,13 @@ Current tools:
 | `list_processor` | 列表处理 | Parse, sort, deduplicate, shuffle, and clean line- or comma-separated lists. |
 | `json_tool` | JSON工具 | Format, minify, and validate JSON locally with bounded input size and safe parse errors. |
 | `base64_tool` | Base64 | Encode and decode bounded UTF-8 text locally; it does not treat input as a file or executable content. |
-| `url_tool` | URL 编解码 | Encode and decode URI components and parse repeated query parameters locally without opening or requesting URLs. |
+| `url_tool` | URL 编解码 | Encode and decode URI components, parse repeated query parameters, and convert bounded international domain labels to or from canonical Punycode locally without opening or requesting URLs. |
 | `timestamp_converter` | Unix 时间戳 | Convert bounded Unix seconds or milliseconds to local dates, convert supported local dates back to timestamps, and translate wall-clock times among a built-in bounded list of IANA zones offline. |
 | `number_base_converter` | 进制转换 | Convert signed arbitrary-precision integers among binary, octal, decimal, and hexadecimal with bounded input. |
 | `uuid_generator` | UUID 生成 | Generate bounded batches of UUID v4 or RFC 9562 UUID v7 values with the platform cryptographically secure random source; results remain in memory and v7 is never presented as a secret token. |
 | `regex_tester` | 正则测试 | Test bounded regular expressions in a killable background isolate with timeout protection and bounded match output. |
 | `hash_generator` | 哈希生成 | Generate bounded UTF-8 text digests, SHA-256/SHA-512 HMAC values, or stream a user-selected Android file up to 512 MB through the system document picker for MD5/SHA verification; never upload, modify, log, or persist file content, keys, or paths. |
-| `color_contrast` | 颜色与对比度 | Strictly convert bounded HEX/RGB/HSL/HSV colors, calculate WCAG contrast ratios and AA/AAA thresholds, and preview three color-vision-deficiency transformations locally without making medical claims. |
+| `color_contrast` | 颜色与对比度 | Strictly convert bounded HEX/RGB/HSL/HSV colors, calculate WCAG contrast ratios and AA/AAA thresholds, preview three color-vision-deficiency transformations, and generate a bounded five-tone HSL theme palette locally without making medical claims. |
 | `jwt_viewer` | JWT 查看 | Decode bounded JWT Header and Payload JSON locally, display expiry hints, and explicitly never claim signature validity. |
 | `csv_json_converter` | CSV/JSON 转换 | Convert bounded RFC-4180-style CSV tables and flat JSON object arrays locally with row, column, and output limits. |
 | `cron_parser` | Cron 解析 | Parse bounded standard five-field Cron expressions offline and calculate five future runs in the device local timezone. |
@@ -55,7 +55,7 @@ Current tools:
 | `markdown_preview` | Markdown 预览 | Render a bounded safe Markdown subset locally; never execute HTML or scripts, load remote resources, or automatically open links. |
 | `http_status_reference` | HTTP 状态码 | Search an offline catalog of common HTTP status meanings, scenarios and handling advice; never send HTTP requests. |
 | `mime_type_reference` | MIME 类型 | Query a bounded built-in extension-to-MIME table in either direction; never read or sniff files. |
-| `image_optimizer` | 图片优化 | Select one JPEG/PNG/WebP image through Android's system picker, enforce 20 MB and 24-megapixel limits, resize/compress it off the UI thread, remove metadata by re-encoding, and explicitly save a result to the public Pictures directory. Never upload images or move image bytes through Dart. |
+| `image_optimizer` | 图片优化 | Select one JPEG/PNG/WebP image through Android's system picker, enforce 20 MB and 24-megapixel limits, inspect a strict EXIF privacy-summary whitelist without returning coordinates or paths, resize/compress it off the UI thread, remove metadata by re-encoding, and explicitly save a result to the public Pictures directory. Never upload images or move image bytes through Dart. |
 | `aspect_ratio_calculator` | 宽高比计算 | Reduce integer dimensions to a ratio and calculate bounded aspect-preserving target dimensions locally. |
 | `yaml_json_converter` | YAML/JSON 转换 | Convert bounded YAML and JSON documents locally with node, depth, input, and output limits; only JSON-compatible values and string mapping keys are accepted. |
 | `xml_tool` | XML 工具 | Format, minify, and validate bounded XML locally while rejecting DTD and entity declarations and enforcing node, depth, input, and output limits. |
@@ -97,6 +97,8 @@ Candidate tools checked against the current inventory:
 - Now covered: color-vision preview extends `color_contrast`; Code 128, EAN-13 and UPC-A generation extends `qr_code`; fixed-rate equal-payment amortization belongs to `loan_calculator`. Extend these modules instead of adding duplicates.
 - Now covered: bounded local password-strength hints extend `password_generator`; IANA world-time conversion extends `timestamp_converter`; UUID v7 extends `uuid_generator`. Extend these modules instead of adding duplicate entries.
 - Now covered: HEX/RGB/HSL/HSV conversion extends `color_contrast`, decimal SI and binary IEC data-capacity conversion extends `unit_converter`, and manual DD/DMS plus great-circle calculations belong to `coordinate_tool`. Extend these modules instead of adding duplicate entries.
+- Now covered: EXIF privacy-summary inspection extends `image_optimizer`, bounded Punycode conversion extends `url_tool`, and five-tone theme palette generation extends `color_contrast`. Extend these modules instead of adding duplicate entries.
+- Full EXIF editors, coordinate display, bulk metadata scanning, complete IDNA registration validation, DNS lookup, and full brand design systems remain outside these reviewed extensions.
 - Device location, route planning, turn-by-turn navigation, elevation models and professional geodesy are outside the reviewed `coordinate_tool` scope.
 - Barcode scanning/camera workflows, floating-rate loans, regulatory APR, fees, taxes and personalized financial advice are outside the current reviewed scope.
 - Do not add a separate ASCII table; ASCII inspection is a filter inside `unicode_inspector`.
